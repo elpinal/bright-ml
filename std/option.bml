@@ -1,0 +1,64 @@
+module Option :> sig
+  datatype option 'a =
+    | None
+    | Some of 'a
+
+  type t = option
+
+  val is_none 'a : t 'a -> bool
+  val is_some 'a : t 'a -> bool
+
+  val unwrap_or 'a : 'a -> t 'a -> 'a
+  val map_or 'a 'b : 'b -> ('a -> 'b) -> t 'a -> 'b
+
+  include Monad.S where type t := t
+end = struct
+  datatype option 'a =
+    | None
+    | Some of 'a
+
+  type t = option
+
+  val is_none = function
+    | None   -> true
+    | Some _ -> false
+  end
+
+  val is_some = function
+    | None   -> false
+    | Some _ -> true
+  end
+
+  val map f = function
+    | None   -> None
+    | Some x -> Some $ f x
+  end
+
+  val return = Some
+
+  val apply a b = match a with
+    | None   -> None
+    | Some f -> map f b
+  end
+
+  val bind v f = match v with
+    | None   -> None
+    | Some x -> f x
+  end
+
+  val unwrap_or def = function
+    | None   -> def
+    | Some x -> x
+  end
+
+  val map_or def f = function
+    | None   -> def
+    | Some x -> f x
+  end
+end
+
+include Option : sig
+  datatype option 'a =
+    | None
+    | Some of 'a
+end

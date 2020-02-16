@@ -1,0 +1,22 @@
+// Inspired by Haskell's `Data.Function` module.
+module Function :> sig
+  val id 'a         : 'a -> 'a
+  val const 'a 'b   : 'a -> 'b -> 'a
+  val flip 'a 'b 'c : ('a -> 'b -> 'c) -> 'b -> 'a -> 'c
+  val fix 'a 'b     : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+
+  val `<<<` 'a 'b 'c : ('b -> 'c) -> ('a -> 'b) -> 'a -> 'c
+  val `>>>` 'a 'b 'c : ('a -> 'b) -> ('b -> 'c) -> 'a -> 'c
+end = struct
+  val id x = x
+  val const x _ = x
+
+  val flip f x y = f y x
+
+  val rec fix f x = f (fix f) x
+
+  val `<<<` g f x = g $ f x
+  val `>>>` f g x = g $ f x
+end
+
+include Function

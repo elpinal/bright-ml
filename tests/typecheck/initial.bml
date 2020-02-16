@@ -1,0 +1,45 @@
+type t = int
+type u = bool
+type t = char -> u -> list unit
+type binary 'a = 'a -> 'a -> 'a
+
+val _ : string -> unit = print_endline
+val _ : int -> string = show_int
+val _ : string -> string -> string = concat_string
+val _ : binary string = concat_string
+
+val s : string = show_int 0
+
+val s1 = concat_string (concat_string s s) (show_int 1000000)
+
+val s2 : string = ""
+val s3 : string = "hello world!"
+
+val _ : let type t = string in t = concat_string s2 s3
+
+val double_quote = "\""
+val new_line = "\n"
+
+val f = fun b -> b
+val f b = b
+val f b = if b then 1 else 9
+val f (b : bool) = if b then 1 else 9
+
+val _ = f true
+val _ = f false
+
+val _ = if true then "true" else "false"
+
+val _ =
+  let val id x = x in
+    if id false then 5 else 999
+
+include struct
+  open struct
+    type int = string
+  end
+
+  val _ : int = "hi"
+end
+
+val _ : int = 55

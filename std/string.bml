@@ -1,0 +1,16 @@
+module String :> sig
+  type t = string
+
+  include Ord.OPS where type t := t
+  include Monoid.S where type t := t
+end = struct
+  type t = string
+
+  include Ord.Make struct
+    type t = t
+    val compare = compare_string
+  end
+
+  val empty = ""
+  val `<>` = concat_string
+end

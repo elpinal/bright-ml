@@ -1,0 +1,110 @@
+datatype nat =
+  | Z
+  | S of nat
+
+datatype option 'a =
+  | None
+  | Some of 'a
+
+signature LIST = sig
+  datatype t 'a =
+    | Nil
+    | Cons of 'a * t 'a
+
+  val return 'a : 'a -> t 'a
+  val map 'a 'b : ('a -> 'b) -> t 'a -> t 'b
+  val length 'a : t 'a -> nat
+  val null 'a : t 'a -> bool
+  val head 'a : t 'a -> option 'a
+  val tail 'a : t 'a -> t 'a
+  val last 'a : t 'a -> option 'a
+  val take 'a : nat -> t 'a -> t 'a
+  val zip 'a 'b : t 'a -> t 'b -> t ('a * 'b)
+  val filter 'a : ('a -> bool) -> t 'a -> t 'a
+  val partition 'a : ('a -> bool) -> t 'a -> t 'a * t 'a
+
+  val fold_left 'a 'b : ('b -> 'a -> 'b) -> 'b -> t 'a -> 'b
+  val fold_right 'a 'b : ('a -> 'b -> 'b) -> 'b -> t 'a -> 'b
+end
+
+module List :> LIST = struct
+  datatype t 'a =
+    | Nil
+    | Cons of 'a * t 'a
+
+  val return x = Cons(x, Nil)
+
+  val rec map f = function
+    | Nil         -> Nil
+    | Cons(x, xs) -> Cons(f x, map f xs)
+  end
+
+  val rec length xs = match xs with
+    | Nil         -> Z
+    | Cons(_, xs) -> S(length xs)
+  end
+
+  val null = function
+    | Nil    -> true
+    | Cons _ -> false
+  end
+
+  val head = function
+    | Nil        -> None
+    | Cons(x, _) -> Some x
+  end
+
+  val tail = function
+    | Nil         -> Nil
+    | Cons(_, xs) -> xs
+  end
+
+  val rec last xs = match xs with
+    | Nil          -> None
+    | Cons(x, Nil) -> Some x
+    | Cons(x, ys)  -> last ys
+  end
+
+  val rec take n xs = match (n, xs) with
+    | (Z, _)             -> Nil
+    | (S _, Nil)         -> Nil
+    | (S n, Cons(x, xs)) -> Cons(x, take n xs)
+  end
+
+  val rec zip xs ys = match (xs, ys) with
+    | (Nil, Nil)                 -> Nil
+    | (Cons(x, xs), Cons(y, ys)) -> Cons((x, y), zip xs ys)
+    | _                          -> Nil
+  end
+
+  val rec filter p = function
+    | Nil         -> Nil
+    | Cons(x, xs) ->
+        if p x
+        then Cons(x, filter p xs)
+        else filter p xs
+  end
+
+  open struct
+    val cons x xs = Cons(x, xs)
+  end
+
+  val rec partition p = function
+    | Nil         -> (Nil, Nil)
+    | Cons(x, xs) ->
+        let val (as, bs) = partition p xs in
+        if p x
+        then (cons x as, bs)
+        else (as, cons x bs)
+  end
+
+  val rec fold_left f e = function
+    | Nil         -> e
+    | Cons(x, xs) -> fold_left f (f e x) xs
+  end
+
+  val rec fold_right f e = function
+    | Nil         -> e
+    | Cons(x, xs) -> f x (fold_right f e xs)
+  end
+end

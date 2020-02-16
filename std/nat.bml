@@ -1,0 +1,92 @@
+module Nat :> sig
+  type t
+
+  val zero : t
+  val one : t
+  val succ : t -> t
+  val pred : t -> t
+
+  val to_int : t -> int
+
+  val `+` : t -> t -> t
+  val `-` : t -> t -> t
+  val `*` : t -> t -> t
+
+  module Add : Monoid.S where type t = t
+  module Mul : Monoid.S where type t = t
+
+  include Ord.OPS where type t := t
+end = struct
+  datatype u 'a =
+    | Z
+    | S of 'a
+
+  module Fixed = Cata.F struct
+    type t = u
+
+    val map f = function
+      | Z   -> Z
+      | S x -> S $ f x
+    end
+  end
+
+  open Fixed
+
+  type t = Fixed.t
+
+  val zero = In Z
+  val succ n = In $ S n
+
+  val one = succ zero
+
+  val pred = cata $ function
+    | Z   -> zero
+    | S n -> n
+  end
+
+  val to_int = cata $ function
+    | Z   -> 0
+    | S n -> n + 1
+  end
+
+  val `+` x = cata $ function
+    | Z   -> x
+    | S n -> succ n
+  end
+
+  val `-` x = cata $ function
+    | Z   -> x
+    | S n -> pred n
+  end
+
+  val `*` x = cata $ function
+    | Z   -> zero
+    | S n -> x + n
+  end
+
+  module Add = struct
+    type t = t
+
+    val empty = zero
+    val `<>` x y = x + y
+  end
+
+  module Mul = struct
+    type t = t
+
+    val empty = one
+    val `<>` x y = `*` x y
+  end
+
+  val rec compare (In x) (In y) = match (x, y) with
+    | (Z, Z)     -> EQ
+    | (Z, _)     -> LT
+    | (S _, Z)   -> GT
+    | (S m, S n) -> compare m n
+  end
+
+  include Ord.Make struct
+    type t = t
+    val compare = compare
+  end
+end

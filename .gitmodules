@@ -1,0 +1,6 @@
+[submodule "cmlib-mosml"]
+	path = cmlib-mosml
+	url = https://github.com/elpinal/cmlib-mosml.git
+[submodule "sml-personal-lib"]
+	path = lib
+	url = https://github.com/elpinal/sml-personal-lib.git

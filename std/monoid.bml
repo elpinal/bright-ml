@@ -1,0 +1,5 @@
+signature S = sig
+  include Semigroup.S
+
+  val empty : t
+end

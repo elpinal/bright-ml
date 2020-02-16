@@ -1,0 +1,5 @@
+signature S = sig
+  include Applicative.S
+
+  val bind 'a 'b : t 'a -> ('a -> t 'b) -> t 'b
+end

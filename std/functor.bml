@@ -1,0 +1,5 @@
+signature S = sig
+  type t 'a
+
+  val map 'a 'b : ('a -> 'b) -> t 'a -> t 'b
+end

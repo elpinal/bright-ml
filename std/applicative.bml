@@ -1,0 +1,6 @@
+signature S = sig
+  include Functor.S
+
+  val return 'a   : 'a -> t 'a
+  val apply 'a 'b : t ('a -> 'b) -> t 'a -> t 'b
+end

@@ -1,0 +1,37 @@
+signature S = sig
+  type t
+
+  val compare : t -> t -> order
+end
+
+signature OPS = sig
+  include S
+  include Eq.S where type t := t
+
+  val `<` : t -> t -> bool
+  val `>` : t -> t -> bool
+end
+
+module Make (X : S) : OPS where type t = X.t = struct
+  include X
+
+  val `<` x y = match compare x y with
+    | LT -> true
+    | _  -> false
+  end
+
+  val `>` x y = match compare x y with
+    | GT -> true
+    | _  -> false
+  end
+
+  val `==` x y = match compare x y with
+    | EQ -> true
+    | _  -> false
+  end
+
+  val `/=` x y = match compare x y with
+    | EQ -> false
+    | _  -> true
+  end
+end

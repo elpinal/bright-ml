@@ -1,0 +1,41 @@
+module Int :> sig
+  type t = int
+
+  val show : t -> string
+
+  val `+` : t -> t -> t
+  val `-` : t -> t -> t
+  val `*` : t -> t -> t
+
+  include Ord.OPS where type t := t
+
+  module Sum : Monoid.S where type t = t
+  module Product : Monoid.S where type t = t
+end = struct
+  type t = int
+
+  val show = show_int
+
+  val `+` = `+`
+  val `-` = `-`
+  val `*` = `*`
+
+  include Ord.Make struct
+    type t = t
+    val compare = compare_int
+  end
+
+  module Sum = struct
+    type t = t
+
+    val empty = 0
+    val `<>` x y = x + y
+  end
+
+  module Product = struct
+    type t = t
+
+    val empty = 1
+    val `<>` x y = x * y
+  end
+end

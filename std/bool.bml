@@ -1,0 +1,55 @@
+module Bool :> sig
+  type t = bool
+
+  val show : t -> string
+
+  val not   : t -> t
+  val r#and : t -> t -> t
+  val or    : t -> t -> t
+  val xor   : t -> t -> t
+
+  include Ord.OPS where type t := t
+
+  module All : Monoid.S where type t = t
+  module Any : Monoid.S where type t = t
+end = struct
+  type t = bool
+
+  val show b = if b then "true" else "false"
+
+  val not b = if b then false else true
+
+  val compare x y =
+    if x
+    then
+      if y
+      then EQ
+      else GT
+    else
+      if y
+      then LT
+      else EQ
+
+  include Ord.Make struct
+    type t = t
+    val compare = compare
+  end
+
+  val r#and x y = if x then y else false
+  val or x y = if x then true else y
+  val xor = `/=`
+
+  module All = struct
+    type t = t
+
+    val empty = true
+    val `<>` = r#and
+  end
+
+  module Any = struct
+    type t = t
+
+    val empty = false
+    val `<>` = or
+  end
+end

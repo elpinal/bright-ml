@@ -1,0 +1,83 @@
+module Result :> sig
+  datatype result 'e 'a =
+    | Err of 'e
+    | Ok of 'a
+
+  type t = result
+
+  val is_err 'e 'a : t 'e 'a -> bool
+  val is_ok 'e 'a  : t 'e 'a -> bool
+
+  val err 'e 'a : t 'e 'a -> option 'e
+  val ok 'e 'a : t 'e 'a -> option 'a
+
+  val map 'e 'a 'b         : ('a -> 'b) -> t 'e 'a -> t 'e 'b
+  val map_err 'e 'f 'a     : ('e -> 'f) -> t 'e 'a -> t 'f 'a
+  val map_or 'e 'a 'b      : 'b -> ('a -> 'b) -> t 'e 'a -> 'b
+  val map_or_else 'e 'a 'b : ('e -> 'b) -> ('a -> 'b) -> t 'e 'a -> 'b
+
+  val unwrap_or 'e 'a      : 'a -> t 'e 'a -> 'a
+  val unwrap_or_else 'e 'a : ('e -> 'a) -> t 'e 'a -> 'a
+end = struct
+  datatype result 'e 'a =
+    | Err of 'e
+    | Ok of 'a
+
+  type t = result
+
+  val is_err = function
+    | Err _ -> true
+    | Ok _  -> false
+  end
+
+  val is_ok = function
+    | Err _ -> false
+    | Ok _  -> true
+  end
+
+  val map f = function
+    | Err e -> Err e
+    | Ok x  -> Ok $ f x
+  end
+
+  val err = function
+    | Err e -> Some e
+    | Ok _  -> None
+  end
+
+  val ok = function
+    | Err _ -> None
+    | Ok x  -> Some x
+  end
+
+  val map_err f = function
+    | Err e -> Err $ f e
+    | Ok x  -> Ok x
+  end
+
+  val map_or def f = function
+    | Err e -> def
+    | Ok x  -> f x
+  end
+
+  val map_or_else g f = function
+    | Err e -> g e
+    | Ok x  -> f x
+  end
+
+  val unwrap_or def = function
+    | Err _ -> def
+    | Ok x  -> x
+  end
+
+  val unwrap_or_else f = function
+    | Err e -> f e
+    | Ok x  -> x
+  end
+end
+
+include Result : sig
+  datatype result 'e 'a =
+    | Err of 'e
+    | Ok of 'a
+end

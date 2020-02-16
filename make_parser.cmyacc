@@ -1,0 +1,368 @@
+sml
+name MakeParser
+
+terminal NUMBER of int
+terminal STRING of string
+terminal CHAR of char
+terminal LOWER_IDENT of string
+terminal UPPER_IDENT of string
+terminal QUOTE_IDENT of string
+
+terminal EQUAL
+terminal COLON
+terminal COLON_GT
+terminal COLON_EQ
+terminal COLON_COLON precr 50
+terminal RARROW precr 20
+terminal BAR
+terminal UNDERSCORE
+terminal ASTERISK precl 70
+terminal COMMA
+terminal DOLLAR precr 0
+
+terminal PLUS        precl 60
+terminal MINUS       precl 60
+terminal GT          precl 40
+terminal LT          precl 40
+terminal GT_EQ       precl 40
+terminal LT_EQ       precl 40
+terminal GT_GT_GT    precr 10
+terminal LT_LT_LT    precr 10
+terminal EQUAL_EQUAL precl 40
+terminal SLASH_EQUAL precl 40
+terminal LT_GT       precl 60
+terminal LT_PLUS_GT  precl 60
+
+terminal LPAREN of left_paren_kind_ref
+terminal RPAREN
+terminal LBRACE
+terminal RBRACE
+terminal LBRACK
+terminal RBRACK
+
+terminal LPAREN_PROJ
+
+terminal DOT
+
+terminal SUBMODULE
+
+terminal STRUCT
+terminal SIG
+terminal VAL
+terminal TYPE
+terminal MODULE
+terminal SIGNATURE
+terminal INCLUDE
+terminal OPEN
+terminal WHERE
+terminal DATATYPE
+terminal OF
+terminal LET
+terminal IN
+terminal FUN
+terminal FUNCTION
+terminal FUNCTOR
+terminal IF
+terminal THEN
+terminal ELSE
+terminal FALSE
+terminal TRUE
+terminal MATCH
+terminal WITH
+terminal END
+terminal REC
+terminal AND
+terminal PACK
+terminal UNPACK
+
+nonterminal Unit : program_unit =
+  1:Bindings         => unit_bindings
+  1:Submodule 2:Unit => unit_cons
+
+nonterminal Submodule : submodule =
+  SUBMODULE 1:STRING                     => submodule_include
+  SUBMODULE 1:UPPER_IDENT EQUAL 2:STRING => submodule_bind
+
+nonterminal Module : module =
+  1:ModuleColon                      => module_colon
+  1:ModuleFunctor                    => module_functor
+  1:ModuleApp 2:ModuleFunctor        => app_to_functor
+  UNPACK 1:ExprApp COLON 2:Signature => unpack
+
+nonterminal ModuleFunctor : module =
+  FUNCTOR 1:MParams RARROW 2:Module => functor_
+
+nonterminal MParams : mparams =
+  1:MParam           => mparam1
+  1:MParam 2:MParams => mparam_cons
+
+nonterminal MParam : mparam =
+  LPAREN 1:UPPER_IDENT COLON 2:Signature RPAREN => functor_param
+
+nonterminal MParams0 : mparam_list =
+  /* empty */ => empty_mparam_list
+  1:MParams   => mparam_list_from_non_empty
+
+nonterminal ModuleColon : module =
+  1:ModuleApp                        => module_app
+  1:ModuleColon COLON 2:Signature    => transparent_ascription
+  1:ModuleColon COLON_GT 2:Signature => seal
+
+nonterminal ModuleApp : module =
+  1:ModuleAtom             => module_atom
+  1:ModuleApp 2:ModuleAtom => app_module
+
+nonterminal ModuleAtom : module =
+  LPAREN 1:Module RPAREN                                => paren_module
+  LPAREN_PROJ 1:Module RPAREN DOT 2:UPPER_IDENT 3:Projs => proj
+  STRUCT 1:Bindings END 2:Projs                         => bindings
+  1:UPPER_IDENT 2:Projs                                 => module_ident
+
+nonterminal Path : module =
+  LPAREN_PROJ 1:Module RPAREN => path
+  STRUCT 1:Bindings END       => path_bindings
+  1:UPPER_IDENT               => path_module_ident
+
+nonterminal Projs : projs =
+  /* empty */               => proj_none
+  DOT 1:UPPER_IDENT 2:Projs => proj_some
+
+nonterminal UIDs1 : string_non_empty =
+  DOT 1:UPPER_IDENT 2:UIDs => uids1
+
+nonterminal UIDs : string_list =
+  /* empty */              => uids_empty
+  DOT 1:UPPER_IDENT 2:UIDs => uids_cons
+
+nonterminal LowerProj : string_non_empty =
+  DOT 1:LOWER_IDENT             => lower_proj
+  DOT 1:UPPER_IDENT 2:LowerProj => cons_lower_proj
+
+nonterminal Bindings : binding_list =
+  /* empty */              => empty_bindings
+  1:Binding 2:Bindings     => cons_bindings
+  OPEN 1:Module 2:Bindings => open_binding
+
+nonterminal Binding : binding =
+  VAL 1:ValBinding                                        => val_binding_
+  TYPE 1:LOWER_IDENT 2:TypeVars EQUAL 3:Type              => type_binding
+  MODULE 1:UPPER_IDENT 2:MParams0 3:SigAnn EQUAL 4:Module => module_binding
+  SIGNATURE 1:UPPER_IDENT EQUAL 2:Signature               => signature_binding
+  INCLUDE 1:Module                                        => include_binding
+  DATATYPE 1:LOWER_IDENT 2:TypeVars EQUAL 3:DatatypeDec 4:DatatypeAnd => datatype_binding
+
+nonterminal SigAnn : signature_ann =
+  /* empty */          => no_sig_ann
+  COLON 1:Signature    => ann_ascribe
+  COLON_GT 1:Signature => ann_seal
+
+nonterminal ValBinding : val_binding =
+  1:Pattern EQUAL 2:Expr                               => val_binding1
+  1:LOWER_IDENT 2:TypeVars 3:Params EQUAL 4:Expr       => val_binding2
+  REC 1:LOWER_IDENT 2:Params EQUAL 3:Expr 4:RecBinding => val_rec_binding
+
+nonterminal RecBinding : val_rec_map =
+  /* empty */                                          => empty_val_rec
+  AND 1:LOWER_IDENT 2:Params EQUAL 3:Expr 4:RecBinding => val_rec_and
+
+nonterminal OptBar : opt_bar =
+  /* empty */ => no_bar
+  BAR         => bar
+
+nonterminal DatatypeDec : datatype_dec =
+  BAR                                        => empty_datatype
+  OptBar 1:UPPER_IDENT 2:Datatype1           => head_d1
+  OptBar 1:UPPER_IDENT OF 2:Type 3:Datatype1 => head_d2
+
+nonterminal Datatype1 : datatype_dec =
+  /* empty */                             => empty_d
+  BAR 1:UPPER_IDENT 2:Datatype1           => cons_d1
+  BAR 1:UPPER_IDENT OF 2:Type 3:Datatype1 => cons_d2
+
+nonterminal DatatypeAnd : datatype_and =
+  /* empty */                                                    => datatype_no_and
+  AND 1:LOWER_IDENT 2:TypeVars EQUAL 3:DatatypeDec 4:DatatypeAnd => datatype_and_
+
+nonterminal TypeVars : type_vars =
+  1:TypeVarsAcc => from_type_vars_acc
+
+nonterminal TypeVarsAcc : type_var_acc =
+  /* empty */             => empty_type_vars
+  1:TypeVar 2:TypeVarsAcc => cons_type_vars
+
+nonterminal TypeVar : type_var =
+  1:QUOTE_IDENT => quote_ident
+
+nonterminal Signature : signature_ =
+  1:SigWhere                                                       => sig_where
+  LPAREN 1:UPPER_IDENT COLON 2:Signature RPAREN RARROW 3:Signature => impure_functor
+  1:SigAtom RARROW 2:Signature                                     => impure_functor_simple
+  LET 1:Bindings IN 2:Signature                                    => let_sig
+
+nonterminal SigWhere : signature_ =
+  1:SigAtom                                        => sig_atom
+  1:SigWhere WHERE TYPE 2:LongType EQUAL 3:Type    => where_type
+  1:SigWhere WHERE TYPE 2:LongType COLON_EQ 3:Type => where_type_destructive
+
+nonterminal SigAtom : signature_ =
+  LPAREN 1:Signature RPAREN => paren_signature
+  SIG 1:Decls END           => decls
+  1:UPPER_IDENT             => signature_ident
+  1:Path 2:UIDs1            => sig_path
+
+nonterminal LongType : long_type =
+  1:LOWER_IDENT                => short_type_ident
+  1:UPPER_IDENT DOT 2:LongType => long_type_ident
+
+nonterminal Decls : decl_list =
+  /* empty */           => empty_decls
+  1:Decl 2:Decls        => cons_decls
+  OPEN 1:Module 2:Decls => open_decl
+
+nonterminal Decl : decl =
+  VAL 1:LOWER_IDENT 2:TypeVars COLON 3:Type  => val_decl
+  TYPE 1:LOWER_IDENT 2:TypeVars EQUAL 3:Type => transparent_type_decl
+  TYPE 1:LOWER_IDENT 2:TypeVars              => opaque_type_decl
+  MODULE 1:UPPER_IDENT 2:MParams0 COLON 3:Signature => module_decl
+  SIGNATURE 1:UPPER_IDENT EQUAL 2:Signature  => signature_decl
+  INCLUDE 1:Signature                        => include_decl
+  DATATYPE 1:LOWER_IDENT 2:TypeVars EQUAL 3:DatatypeDec 4:DatatypeAnd => datatype_decl
+
+nonterminal Expr : expr =
+  1:ExprApp                         => expr_app
+  1:ExprBin_                        => expr_binary
+  LET 1:Bindings IN 2:Expr          => let_expr
+  FUN 1:Params RARROW 2:Expr        => lambda
+  IF 1:Expr THEN 2:Expr ELSE 3:Expr => if_expr
+  MATCH 1:Expr WITH 2:Branches END  => match
+  FUNCTION 1:Branches END           => function
+  PACK 1:ModuleApp COLON 2:Signature => pack
+
+nonterminal ExprBin_ : expr =
+  1:ExprBin COLON_COLON 2:Expr => cons_list_expr
+  1:ExprBin DOLLAR 2:Expr      => expr_dollar
+  1:ExprBin PLUS 2:Expr        => expr_plus
+  1:ExprBin MINUS 2:Expr       => expr_minus
+  1:ExprBin ASTERISK 2:Expr    => expr_times
+  1:ExprBin GT 2:Expr          => expr_gt
+  1:ExprBin LT 2:Expr          => expr_lt
+  1:ExprBin GT_EQ 2:Expr       => expr_gt
+  1:ExprBin LT_EQ 2:Expr       => expr_lt
+  1:ExprBin GT_GT_GT 2:Expr    => expr_gt_gt_gt
+  1:ExprBin LT_LT_LT 2:Expr    => expr_lt_lt_lt
+  1:ExprBin EQUAL_EQUAL 2:Expr => expr_equal_equal
+  1:ExprBin SLASH_EQUAL 2:Expr => expr_slash_equal
+  1:ExprBin LT_GT 2:Expr       => expr_lt_gt
+  1:ExprBin LT_PLUS_GT 2:Expr  => expr_lt_plus_gt
+
+nonterminal ExprBin : expr =
+  1:ExprApp                       => expr_app
+  1:ExprBin COLON_COLON 2:ExprBin => cons_list_expr
+  1:ExprBin PLUS 2:ExprBin        => expr_plus
+  1:ExprBin MINUS 2:ExprBin       => expr_minus
+  1:ExprBin ASTERISK 2:ExprBin    => expr_times
+  1:ExprBin GT 2:ExprBin          => expr_gt
+  1:ExprBin LT 2:ExprBin          => expr_lt
+  1:ExprBin GT_EQ 2:ExprBin       => expr_gt
+  1:ExprBin LT_EQ 2:ExprBin       => expr_lt
+  1:ExprBin GT_GT_GT 2:ExprBin    => expr_gt_gt_gt
+  1:ExprBin LT_LT_LT 2:ExprBin    => expr_lt_lt_lt
+  1:ExprBin EQUAL_EQUAL 2:ExprBin => expr_equal_equal
+  1:ExprBin SLASH_EQUAL 2:ExprBin => expr_slash_equal
+  1:ExprBin LT_GT 2:ExprBin       => expr_lt_gt
+  1:ExprBin LT_PLUS_GT 2:ExprBin  => expr_lt_plus_gt
+
+nonterminal ExprApp : expr =
+  1:ExprAtom                       => expr_atom
+  1:ExprApp 2:ExprAtom             => app
+
+nonterminal Tuple : expr_non_empty =
+  1:Expr               => expr1
+  1:Expr COMMA 2:Tuple => cons_expr
+
+nonterminal ExprAtom : expr =
+  LPAREN 1:Tuple RPAREN => tuple_or_paren
+  1:Literal             => lit
+  1:LOWER_IDENT         => val_ident
+  1:Path 2:LowerProj    => expr_path
+  1:UPPER_IDENT         => constructor
+  1:Path 2:UIDs1        => constructor_path
+  LBRACK 1:List RBRACK  => list
+
+nonterminal List : expr_list =
+  /* empty */             => empty_list
+  1:Expr                  => singleton_list
+  1:Expr COMMA 2:NonEmpty => cons_list
+
+nonterminal NonEmpty : expr_non_empty =
+  1:Expr                  => singleton_non_empty
+  1:Expr COMMA 2:NonEmpty => cons_non_empty
+
+nonterminal Branches : branches =
+  /* empty */                 => empty_branches
+  OptBar 1:Branch 2:Branches1 => cons_branches
+
+nonterminal Branches1 : branches =
+  /* empty */              => empty_branches1
+  BAR 1:Branch 2:Branches1 => cons_branches1
+
+nonterminal Branch : branch =
+  1:PatternInfix RARROW 2:Expr => branch_expr
+
+nonterminal Literal : literal =
+  1:NUMBER => number
+  1:STRING => string_literal
+  1:CHAR   => char_literal
+  FALSE    => bool_false
+  TRUE     => bool_true
+
+nonterminal Params : params =
+  1:PatternAtom          => param1
+  1:PatternAtom 2:Params => cons_params
+
+nonterminal Pattern : pattern =
+  1:PatternInfix              => pattern_infix
+  1:PatternInfix COLON 2:Type => typed_pattern
+
+nonterminal PatternInfix : pattern =
+  1:PatternTerm                            => pattern_term
+  1:PatternTerm COLON_COLON 2:PatternInfix => cons_list_pattern
+
+nonterminal PatternTerm : pattern =
+  1:PatternAtom                => pattern_atom
+  1:UPPER_IDENT 2:PatternAtom  => constructor_pattern2
+  1:Path 2:UIDs1 3:PatternAtom => constructor_path_pattern2
+
+nonterminal PatternAtom : pattern =
+  LPAREN 1:TuplePattern RPAREN => tuple_or_paren_pattern
+  1:LOWER_IDENT                => var_pattern
+  1:UPPER_IDENT                => constructor_pattern1
+  1:Path 2:UIDs1               => constructor_path_pattern1
+  UNDERSCORE                   => wildcard
+  LBRACK RBRACK                => nil_pattern
+
+nonterminal TuplePattern : pattern_non_empty =
+  1:Pattern                      => pattern1
+  1:Pattern COMMA 2:TuplePattern => cons_pattern
+
+nonterminal Type : typ =
+  1:TupleType               => tuple_type
+  LET 1:Bindings IN 2:Type  => let_type
+  1:TupleType RARROW 2:Type => arrow
+
+nonterminal TupleType : type_list =
+  1:TypeApp                      => type_app
+  1:TypeApp ASTERISK 2:TupleType => cons_tuple
+
+nonterminal TypeApp : typ =
+  1:TypeAtom           => type_atom
+  1:TypeApp 2:TypeAtom => app_type
+  PACK 1:SigAtom       => package_type
+
+nonterminal TypeAtom : typ =
+  LPAREN 1:Type RPAREN => paren_type
+  1:LOWER_IDENT        => type_ident
+  1:Path 2:LowerProj   => type_path
+  1:TypeVar            => type_variable
+
+start Unit

@@ -1,0 +1,177 @@
+val x = 1
+val _ = 2
+val f x = x
+val f x y _ xx = y xx
+
+val rec f x = g x
+and g y = f i g q
+
+val rec q_q x y z _ a (A s) Q = 999
+
+module M = struct
+end
+
+signature S = sig
+  open M
+  type t
+end
+
+datatype t =
+  | A of int
+  | C
+  | B of int
+
+and u =
+    Q of int
+  | II of bool -> t
+
+datatype t 'a 'b = |
+
+val x = C
+val C = x
+
+val C u = 3
+
+val x = M.X
+val x = M.X.C
+val _ = (M struct end).W
+val _ = struct end.W.W.R
+
+val z =
+  let val x = y
+      module M = struct type t = int end
+  in 77
+
+val n : int = 4
+
+val Some(x : bool) = Some 8
+
+val x = fun y -> fun A B C (d : int) -> w
+
+val f from to =
+  match from with
+    | Some x -> x
+    | _      -> 4
+    | None   -> 98
+  end
+
+val f x = function
+  | Some n -> n
+  | None   -> x
+end
+
+signature S = T where type t = int
+signature S = T where type t := int
+
+val Option.Some v = f x
+
+module Q = functor (X : (Y : S) -> T) -> struct
+  datatype t =
+    | A of t
+end
+
+val _ = M.W.x
+
+signature S = (X : S) -> (Y : T) -> U
+
+signature S = (X : S where type t = t -> t) -> U where type t = t -> t
+
+val _ = function
+  | (_ : int) -> 1
+  end
+
+val x : u = 1
+
+type t = t * t * w * int -> a * list
+
+datatype t =
+  | A of t * t
+  | B of t * t * t
+
+val _ = (1, 2, 3, true, false, "a", fun x -> x, A, M.M.x, C, X.C) (1)
+
+// This is a comment.
+val x = 1
+
+// Hello!
+
+type t_t 't = 't 't // This is impossible!
+
+type t = pack S
+type u = pack sig end
+type w = int * pack S -> int
+type x = pack ((X : S) -> T) -> int
+
+type t 'a = pack (MONOID where type t = 'a)
+
+val x = pack M : S
+val x = pack M : S where type t = int
+module M = unpack x : S where type t = int
+module M = unpack f x : S where type t = int
+
+val xs = []
+val xs = [1]
+val xs = [true, false]
+val ys = [pack M : S, fun x -> x, pack F M : S where type t := int]
+
+val _ = function
+  | [] -> 1
+  | x :: xs -> 1
+end
+
+module M = A
+module M = A.B
+module M = A.B.C
+module M = A.B.C.D
+
+module M = (A)
+module M = (A).B
+module M = (A).B.C
+module M = (A).B.C.D
+
+module M = functor (X : S) (Y : T) (Z : U) -> struct end
+module M (X : S) : T = struct end
+module M (X : S) (Y : T) (Z : U) = struct end
+
+signature S = sig
+  module M : (X : S) -> T
+  module M (X : S) : T
+
+  module M : (X : S) -> (X : S) -> T
+  module M (X : S) (X : S) : T
+
+  module M : (X : S) -> (X : S) -> (A : B) -> T
+  module M (X : S) (X : S) (A : B) : T
+end
+
+val x = 1 + 2
+val _ = 4 - 5 + 1
+val _ = 1 + 2 :: 3
+
+val _ = f $ g x
+val _ = f $ 4 + 4
+val _ = 4 - 2 $ 2 - 4
+val _ = f $ g $ x
+
+val _ = g <<< f $ x
+val _ = f >>> g $ x
+val _ = h <<< g <<< f $ x
+
+val _ = f $ g h $ fun x -> x
+
+val _ = "a" <> "b" <+> "c"
+
+val x' = x'
+val f' x y = x + y
+val x'' = x'''
+
+type t' 'a = 'a -> t' 'a
+
+type t' 'a = 'a
+
+val f' x' y' = x'+y'
+val f' x'y' = x'+y'
+
+val f' = 'x'
+
+val `<>` x y = concat_string

@@ -1,0 +1,93 @@
+signature S = sig
+  type t
+  type key
+
+  val empty     : t
+  val singleton : key -> t
+  val insert    : key -> t -> t
+  val from_list : list key -> t
+
+  val delete : key -> t -> t
+
+  val size     : t -> int
+  val is_empty : t -> bool
+  val member   : key -> t -> bool
+  val to_list  : t -> list key
+
+  val union : t -> t -> t
+
+  val fold_left 'a  : ('a -> key -> 'a) -> 'a -> t -> 'a
+  val fold_right 'a : (key -> 'a -> 'a) -> 'a -> t -> 'a
+end
+
+module Make (X : Ord.S) :> S where type key = X.t = struct
+  type key = X.t
+
+  datatype t =
+    | E
+    | T of key * t * t
+
+  val empty = E
+
+  val singleton k = T(k, E, E)
+
+  val rec size s = match s with
+    | E          -> 0
+    | T(_, x, y) -> size x + size y
+  end
+
+  val is_empty = function
+    | E   -> true
+    | T _ -> false
+  end
+
+  val rec member k1 = function
+    | E           -> false
+    | T(k2, x, y) ->
+        match X.compare k1 k2 with
+          | LT -> member k1 x
+          | EQ -> true
+          | GT -> member k1 y
+        end
+  end
+
+  val rec insert k1 = function
+    | E           -> singleton k1
+    | T(k2, x, y) ->
+        match X.compare k1 k2 with
+          | LT -> T(k2, insert k1 x, y)
+          | EQ -> T(k2, x, y)
+          | GT -> T(k2, x, insert k1 y)
+        end
+  end
+
+  val from_list = List.fold_left (flip insert) empty
+
+  val fold_left f =
+    let val rec go e = function
+      | E           -> e
+      | T(k2, x, y) -> go (f (go e x) k2) y
+    end in
+    go
+
+  val fold_right f =
+    let val rec go e = function
+      | E           -> e
+      | T(k2, x, y) -> go (f k2 (go e y)) x
+    end in
+    go
+
+  val union x y = fold_left (flip insert) x y
+
+  val rec delete k1 = function
+    | E           -> E
+    | T(k2, x, y) ->
+        match X.compare k1 k2 with
+          | LT -> T(k2, delete k1 x, y)
+          | EQ -> union x y
+          | GT -> T(k2, x, delete k1 y)
+        end
+  end
+
+  val to_list = fold_right List.cons []
+end

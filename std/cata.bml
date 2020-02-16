@@ -1,0 +1,13 @@
+module F (X : Functor.S) : sig
+  datatype t =
+    | In of X.t t
+
+  val cata 'a : (X.t 'a -> 'a) -> t -> 'a
+end = struct
+  datatype t =
+    | In of X.t t
+
+  val rec cata f = function
+    | In x -> f $ X.map (cata f) x
+  end
+end

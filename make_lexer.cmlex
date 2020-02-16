@@ -1,0 +1,63 @@
+sml
+name MakeLexer
+alphabet 128 /* 1024 is maximum */
+
+set digit = (range '0 '9)
+set digit_start = (range '1 '9)
+
+set lower = (range 'a 'z)
+set upper = (range 'A 'Z)
+set alpha = (or lower upper)
+set alphanumeric = (or digit alpha)
+set ident = (or '_ alphanumeric)
+
+set whitechar = (or 32 9 10)  /* space, tab, lf */
+
+function lex : t =
+  (seq digit_start (* digit)) => number
+  '0 => number
+  '" => string
+  '= => equal
+  ': => colon
+  (seq ': '>) => colon_gt
+  (seq ': '=) => colon_eq
+  (seq ': ':) => colon_colon
+  '| => bar
+  '_ => underscore
+  '* => asterisk
+  ', => comma
+  '$ => dollar
+
+  '+ => plus
+  '- => minus
+  '> => gt
+  '< => lt
+  (seq '> '=) => gt_eq
+  (seq '< '=) => lt_eq
+  (seq '> '> '>) => gt_gt_gt
+  (seq '< '< '<) => lt_lt_lt
+  (seq '= '=) => equal_equal
+  (seq '/ '=) => slash_equal
+  (seq '< '>) => lt_gt
+  (seq '< '+ '>) => lt_plus_gt
+
+  (seq '- '>) => rarrow
+  '( => lparen
+  ') => rparen
+  '[ => lbrack
+  '] => rbrack
+  '{ => lbrace
+  '} => rbrace
+  (seq lower (* ident) (* ''))       => lower_ident
+  (seq upper (* ident) (* ''))       => upper_ident
+  (seq 'r '# lower (* ident) (* '')) => raw_ident
+  (seq '')                           => single_quote
+  '` => backquote_ident
+  '. => dot
+  (+ whitechar) => whitespace
+  (seq '/ '/) => comment
+
+  (seq '0 (+ digit)) => leading_zero
+
+  epsilon => illegal
+  eos => eof

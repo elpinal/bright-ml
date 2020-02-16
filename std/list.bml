@@ -1,0 +1,193 @@
+module List :> sig
+  type t = list
+
+  val length 'a : t 'a -> int
+  val null 'a   : t 'a -> bool
+
+  val nil 'a  : t 'a
+  val cons 'a : 'a -> t 'a -> t 'a
+
+  val `<>` 'a : t 'a -> t 'a -> t 'a
+
+  val head 'a : t 'a -> option 'a
+  val tail 'a : t 'a -> t 'a
+  val last 'a : t 'a -> option 'a
+  val nth 'a  : int -> t 'a -> option 'a
+  val take 'a : int -> t 'a -> t 'a
+  val drop 'a : int -> t 'a -> t 'a
+
+  val zip 'a 'b : t 'a -> t 'b -> t ('a * 'b)
+  val zip_with 'a 'b 'c : ('a -> 'b -> 'c) -> t 'a -> t 'b -> t 'c
+
+  val reverse 'a : t 'a -> t 'a
+
+  val intersperse 'a : 'a -> t 'a -> t 'a
+
+  val all 'a : ('a -> bool) -> t 'a -> bool
+  val any 'a : ('a -> bool) -> t 'a -> bool
+
+  include Functor.S where type t := t
+
+  val flatten 'a : t (t 'a) -> t 'a
+
+  val filter 'a        : ('a -> bool) -> t 'a -> t 'a
+  val filter_map 'a 'b : ('a -> option 'b) -> t 'a -> t 'b
+
+  val fold_left 'a 'b  : ('b -> 'a -> 'b) -> 'b -> t 'a -> 'b
+  val fold_right 'a 'b : ('a -> 'b -> 'b) -> 'b -> t 'a -> 'b
+
+  val fold 'a : pack (Monoid.S where type t = 'a) -> t 'a -> 'a
+end = struct
+  type t = list
+
+  val nil = []
+  val cons x xs = x :: xs
+
+  val null = function
+    | [] -> true
+    | _  -> false
+  end
+
+  val head = function
+    | []     -> None
+    | x :: _ -> Some x
+  end
+
+  val tail = function
+    | []      -> []
+    | _ :: xs -> xs
+  end
+
+  val rec length xs = match xs with
+    | []      -> 0
+    | _ :: xs -> 1 + length xs
+  end
+
+  val rec nth n = function
+    | []      -> None
+    | x :: xs ->
+        let include Int in
+        if n == 0
+        then Some x
+        else nth (n - 1) xs
+  end
+
+  open struct
+    val rec last' x = function
+      | []      -> x
+      | y :: zs -> last' y zs
+    end
+  end
+
+  val last = function
+    | []      -> None
+    | x :: xs -> Some $ last' x xs
+  end
+
+  val rec take n = function
+    | []      -> []
+    | x :: xs ->
+        let include Int in
+        if 0 < n
+        then x :: take (n - 1) xs
+        else []
+  end
+
+  val rec drop n = function
+    | []      -> []
+    | x :: xs ->
+        let include Int in
+        if 0 < n
+        then drop (n - 1) xs
+        else x :: xs
+  end
+
+  val rec map f = function
+    | []      -> []
+    | x :: xs -> f x :: map f xs
+  end
+
+  val rec zip xs ys = match (xs, ys) with
+    | (x :: xs, y :: ys) -> (x, y) :: zip xs ys
+    | _                  -> []
+  end
+
+  val rec zip_with f xs ys = match (xs, ys) with
+    | (x :: xs, y :: ys) -> f x y :: zip_with xs ys
+    | _                  -> []
+  end
+
+  val reverse =
+    let val rec go acc = function
+      | []      -> acc
+      | x :: xs -> go (x :: acc) xs
+    end in
+    go []
+
+  val rec intersperse y = function
+    | []      -> []
+    | x :: [] -> [x]
+    | x :: zs -> x :: y :: intersperse y zs
+  end
+
+  val rec all p = function
+    | []      -> true
+    | x :: xs ->
+        if p x
+        then all p xs
+        else false
+  end
+
+  val rec any p = function
+    | []      -> false
+    | x :: xs ->
+        if p x
+        then true
+        else any p xs
+  end
+
+  val rec `<>` xs ys = match xs with
+    | []      -> ys
+    | x :: xs -> x :: xs <> ys
+  end
+
+  val rec flatten xs = match xs with
+    | []        -> []
+    | xs :: xss -> xs <> flatten xss
+  end
+
+  val rec filter p = function
+    | []      -> []
+    | x :: xs ->
+        if p x
+        then x :: filter p xs
+        else filter p xs
+  end
+
+  val rec filter_map f = function
+    | []      -> []
+    | x :: xs ->
+        match f x with
+          | Some y -> y :: filter_map f xs
+          | None   -> filter_map f xs
+        end
+  end
+
+  val fold_left f =
+    let val rec go e = function
+      | []      -> e
+      | x :: xs -> go (f e x) xs
+    end in
+    go
+
+  val fold_right f e =
+    let val rec go xs = match xs with
+      | []      -> e
+      | x :: xs -> f x $ go xs
+    end in
+    go
+
+  val fold 'a m xs =
+    let module M = unpack m : Monoid.S where type t = 'a in
+    fold_left M.`<>` M.empty xs
+end

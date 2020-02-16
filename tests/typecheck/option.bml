@@ -1,0 +1,75 @@
+signature FUNCTOR = sig
+  type t 'a
+
+  val map 'a 'b : ('a -> 'b) -> t 'a -> t 'b
+end
+
+signature APPLICATIVE = sig
+  include FUNCTOR
+
+  val return 'a : 'a -> t 'a
+  val apply 'a 'b : t ('a -> 'b) -> t 'a -> t 'b
+end
+
+signature MONAD = sig
+  include APPLICATIVE
+
+  val bind 'a 'b : t 'a -> ('a -> t 'b) -> t 'b
+end
+
+signature OPTION = sig
+  datatype t 'a =
+    | None
+    | Some of 'a
+
+  include MONAD where type t := t
+
+  val is_none 'a : t 'a -> bool
+  val is_some 'a : t 'a -> bool
+
+  val unwrap_or 'a : 'a -> t 'a -> 'a
+  val map_or 'a 'b : 'b -> ('a -> 'b) -> t 'a -> 'b
+end
+
+module Option :> OPTION = struct
+  datatype t 'a =
+    | None
+    | Some of 'a
+
+  val return = Some
+
+  val is_none = function
+    | None   -> true
+    | Some x -> false
+  end
+
+  val is_some = function
+    | None   -> false
+    | Some x -> true
+  end
+
+  val map f = function
+    | None   -> None
+    | Some x -> Some (f x)
+  end
+
+  val apply a b = match a with
+    | None   -> None
+    | Some f -> map f b
+  end
+
+  val bind v f = match v with
+    | None   -> None
+    | Some x -> f x
+  end
+
+  val unwrap_or def = function
+    | None   -> def
+    | Some x -> x
+  end
+
+  val map_or def f = function
+    | None   -> def
+    | Some x -> f x
+  end
+end
