@@ -18,6 +18,13 @@ module Result :> sig
 
   val unwrap_or 'e 'a      : 'a -> t 'e 'a -> 'a
   val unwrap_or_else 'e 'a : ('e -> 'a) -> t 'e 'a -> 'a
+
+  include Bifunctor.OPS where type t := t
+
+  module Monad (X : sig type e end) : sig
+    type t 'a = t X.e 'a
+    include Monad.S where type t := t
+  end
 end = struct
   datatype result 'e 'a =
     | Err of 'e
@@ -73,6 +80,35 @@ end = struct
   val unwrap_or_else f = function
     | Err e -> f e
     | Ok x  -> x
+  end
+
+  include Bifunctor.Make struct
+    type t = t
+
+    val bimap f g = map_err f <<< map g
+  end
+
+  module Monad (X : sig type e end) : sig
+    type t 'a = t X.e 'a
+    include Monad.S where type t := t
+  end = struct
+    type t 'a = t X.e 'a
+
+    val map = map
+
+    val return = Ok
+
+    val apply f x =
+      match f with
+        | Err e -> Err e
+        | Ok f  -> map f x
+      end
+
+    val bind x f =
+      match x with
+        | Err e -> Err e
+        | Ok x  -> f x
+      end
   end
 end
 

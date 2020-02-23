@@ -7,8 +7,6 @@ module List :> sig
   val nil 'a  : t 'a
   val cons 'a : 'a -> t 'a -> t 'a
 
-  val `<>` 'a : t 'a -> t 'a -> t 'a
-
   val head 'a : t 'a -> option 'a
   val tail 'a : t 'a -> t 'a
   val last 'a : t 'a -> option 'a
@@ -26,7 +24,8 @@ module List :> sig
   val all 'a : ('a -> bool) -> t 'a -> bool
   val any 'a : ('a -> bool) -> t 'a -> bool
 
-  include Functor.S where type t := t
+  include Applicative.S where type t := t
+  include Alternative.S where type t := t
 
   val flatten 'a : t (t 'a) -> t 'a
 
@@ -107,6 +106,21 @@ end = struct
     | x :: xs -> f x :: map f xs
   end
 
+  val empty = []
+
+  val return x = [x]
+
+  val rec `<>` xs ys = match xs with
+    | []      -> ys
+    | x :: xs -> x :: xs <> ys
+  end
+
+  val rec apply fs xs =
+    match fs with
+      | f :: fs -> map f xs <> apply fs xs
+      | _       -> []
+    end
+
   val rec zip xs ys = match (xs, ys) with
     | (x :: xs, y :: ys) -> (x, y) :: zip xs ys
     | _                  -> []
@@ -146,11 +160,6 @@ end = struct
         else any p xs
   end
 
-  val rec `<>` xs ys = match xs with
-    | []      -> ys
-    | x :: xs -> x :: xs <> ys
-  end
-
   val rec flatten xs = match xs with
     | []        -> []
     | xs :: xss -> xs <> flatten xss
@@ -183,7 +192,7 @@ end = struct
   val fold_right f e =
     let val rec go xs = match xs with
       | []      -> e
-      | x :: xs -> f x $ go xs
+      | x :: xs -> let val r = go xs in f x r
     end in
     go
 

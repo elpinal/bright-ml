@@ -1,0 +1,29 @@
+module Reader (X : sig type t end) :> sig
+  include Monad.S
+  type u = X.t
+
+  val ask        : t u
+  val asks 'a    : (u -> 'a) -> t 'a
+  val r#local 'a : (u -> u) -> t 'a -> t 'a
+
+  val run 'a : u -> t 'a -> 'a
+end = struct
+  type u = X.t
+  type t 'a = u -> 'a
+
+  val map f g = f <<< g
+
+  val return x _ = x
+
+  val apply f x v = f v $ x v
+
+  val bind x f v = f (x v) v
+
+  val ask = id
+
+  val asks f v = f v
+
+  val r#local f g v = g $ f v
+
+  val run v f = f v
+end

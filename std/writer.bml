@@ -1,0 +1,25 @@
+module Writer (X : Monoid.S) :> sig
+  include Monad.S
+  type u = X.t
+
+  val tell : u -> t unit
+
+  val run 'a : t 'a -> 'a * u
+end = struct
+  open X
+
+  type u = X.t
+  type t 'a = 'a * u
+
+  val map f (x, m) = (f x, m)
+
+  val return x = (x, X.empty)
+
+  val apply (f, m1) (x, m2) = (f x, m1 <> m2)
+
+  val bind (x, m1) f = Pair.second (fun m2 -> m1 <> m2) $ f x
+
+  val tell m = ((), m)
+
+  val run (x, m) = (x, m)
+end

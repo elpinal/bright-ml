@@ -1,5 +1,36 @@
+submodule Contravariant = "contravariant"
+
 signature S = sig
   type t 'a
 
   val map 'a 'b : ('a -> 'b) -> t 'a -> t 'b
+end
+
+module Const (X : sig type t end) : S = struct
+  type t 'a = X.t
+
+  val map _ x = x
+end
+
+module Product (X : S) (Y : S) : S = struct
+  type t 'a = X.t 'a * Y.t 'a
+
+  val map f (x, y) = (X.map f x, Y.map f y)
+end
+
+module Sum (X : S) (Y : S) : sig
+  datatype t 'a =
+    | L of X.t 'a
+    | R of Y.t 'a
+
+  include S where type t := t
+end = struct
+  datatype t 'a =
+    | L of X.t 'a
+    | R of Y.t 'a
+
+  val map f = function
+    | L x -> L $ X.map f x
+    | R x -> R $ Y.map f x
+  end
 end

@@ -1,0 +1,19 @@
+module Make (X : Functor.S) : sig
+  datatype t 'a =
+    | In of 'a * X.t (t 'a)
+
+  include Comonad.S where type t := t
+
+  val unwrap 'a : t 'a -> X.t (t 'a)
+end = struct
+  datatype t 'a =
+    | In of 'a * X.t (t 'a)
+
+  val rec map f (In(x, y)) = In(f x, X.map (map f) y)
+
+  val extract (In(x, _)) = x
+
+  val rec duplicate (In(x, y)) = In(In(x, y), X.map duplicate y)
+
+  val unwrap (In(_, x)) = x
+end

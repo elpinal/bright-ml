@@ -1,0 +1,44 @@
+module State (X : sig type t end) :> sig
+  include Monad.S
+  type u = X.t
+
+  val get     : t u
+  val gets 'a : (u -> 'a) -> t 'a
+  val put     : u -> t unit
+  val modify  : (u -> u) -> t unit
+
+  val run 'a        : u -> t 'a -> 'a * u
+  val run_result 'a : u -> t 'a -> 'a
+  val run_state 'a  : u -> t 'a -> u
+end = struct
+  open X
+
+  type u = X.t
+  type t 'a = u -> 'a * u
+
+  val map f g s = Pair.first f $ g s
+
+  val return x s = (x, s)
+
+  val apply f x s =
+    let val (f, s') = f s in
+    Pair.first f $ x s'
+
+  val bind x f s =
+    let val (x, s') = x s in
+    f x s'
+
+  val get s = (s, s)
+
+  val gets f s = (f s, s)
+
+  val put s _ = ((), s)
+
+  val modify f s = ((), f s)
+
+  val run s x = x s
+
+  val run_result s x = let val (y, _) = x s in y
+
+  val run_state s x = let val (_, s') = x s in s'
+end

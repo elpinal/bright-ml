@@ -1,0 +1,6 @@
+signature S = sig
+  type t
+  type base
+
+  val map : (base -> base) -> t -> t
+end

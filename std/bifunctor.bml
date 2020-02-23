@@ -1,0 +1,19 @@
+signature S = sig
+  type t 'a 'b
+
+  val bimap 'a 'b 'c 'd : ('a -> 'c) -> ('b -> 'd) -> t 'a 'b -> t 'c 'd
+end
+
+signature OPS = sig
+  include S
+
+  val first 'a 'b 'c  : ('a -> 'c) -> t 'a 'b -> t 'c 'b
+  val second 'a 'b 'd : ('b -> 'd) -> t 'a 'b -> t 'a 'd
+end
+
+module Make (X : S) : OPS where type t = X.t = struct
+  include X
+
+  val first f x = bimap f id x
+  val second f x = bimap id f x
+end

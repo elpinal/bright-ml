@@ -1,0 +1,6 @@
+signature S = sig
+  type t 'a
+
+  val empty 'a : t 'a
+  val `<>` 'a  : t 'a -> t 'a -> t 'a
+end

@@ -66,14 +66,18 @@ module Make (X : Ord.S) :> S where type key = X.t = struct
   val fold_left f =
     let val rec go e = function
       | E           -> e
-      | T(k2, x, y) -> go (f (go e x) k2) y
+      | T(k2, x, y) ->
+          let val e' = go e x in
+          go (f e' k2) y
     end in
     go
 
   val fold_right f =
     let val rec go e = function
       | E           -> e
-      | T(k2, x, y) -> go (f k2 (go e y)) x
+      | T(k2, x, y) ->
+          let val e' = go e y in
+          go (f k2 e') x
     end in
     go
 

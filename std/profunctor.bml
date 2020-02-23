@@ -1,0 +1,25 @@
+signature S = sig
+  type t 'a 'b
+
+  val dimap 'a 'b 'c 'd : ('c -> 'a) -> ('b -> 'd) -> t 'a 'b -> t 'c 'd
+end
+
+signature OPS = sig
+  include S
+
+  val first 'a 'b 'c  : ('c -> 'a) -> t 'a 'b -> t 'c 'b
+  val second 'a 'b 'd : ('b -> 'd) -> t 'a 'b -> t 'a 'd
+end
+
+module Make (X : S) : OPS where type t = X.t = struct
+  include X
+
+  val first f x = dimap f id x
+  val second f x = dimap id f x
+end
+
+module Function : OPS = Make struct
+  type t 'a 'b = 'a -> 'b
+
+  val dimap f g h = g <<< h <<< f
+end

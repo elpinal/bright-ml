@@ -12,6 +12,7 @@ module Option :> sig
   val map_or 'a 'b : 'b -> ('a -> 'b) -> t 'a -> 'b
 
   include Monad.S where type t := t
+  include Alternative.S where type t := t
 end = struct
   datatype option 'a =
     | None
@@ -55,6 +56,14 @@ end = struct
     | None   -> def
     | Some x -> f x
   end
+
+  val empty = None
+
+  val `<>` x y =
+    match x with
+      | None   -> y
+      | Some x -> Some x
+    end
 end
 
 include Option : sig

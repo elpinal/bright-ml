@@ -1,0 +1,137 @@
+signature S = sig
+  type t 'a
+  type key
+
+  val empty 'a     : t 'a
+  val singleton 'a : key -> 'a -> t 'a
+  val insert 'a    : key -> 'a -> t 'a -> t 'a
+  val from_list 'a : list (key * 'a) -> t 'a
+
+  val delete 'a : key -> t 'a -> t 'a
+
+  val size 'a     : t 'a -> int
+  val is_empty 'a : t 'a -> bool
+  val member 'a   : key -> t 'a -> bool
+  val lookup 'a   : key -> t 'a -> option 'a
+  val to_list 'a  : t 'a -> list (key * 'a)
+
+  // Right-biased.
+  val union 'a : t 'a -> t 'a -> t 'a
+
+  val fold_left 'a 'b  : (key -> 'b -> 'a -> 'b) -> 'b -> t 'a -> 'b
+  val fold_right 'a 'b : (key -> 'a -> 'b -> 'b) -> 'b -> t 'a -> 'b
+
+  val fold 'a : pack (Monoid.S where type t = 'a) -> t 'a -> 'a
+
+  include Functor.S where type t := t
+
+  module Monoid (X : sig type elem end) : Monoid.S where type t = t X.elem
+end
+
+module Make (X : Ord.S) :> S where type key = X.t = struct
+  type key = X.t
+
+  datatype t 'a =
+    | E
+    | T of key * 'a * t 'a * t 'a
+
+  val empty = E
+
+  val singleton k v = T(k, v, E, E)
+
+  val rec size s = match s with
+    | E             -> 0
+    | T(_, _, x, y) -> size x + size y
+  end
+
+  val is_empty = function
+    | E   -> true
+    | T _ -> false
+  end
+
+  val rec member k1 = function
+    | E              -> false
+    | T(k2, _, x, y) ->
+        match X.compare k1 k2 with
+          | LT -> member k1 x
+          | EQ -> true
+          | GT -> member k1 y
+        end
+  end
+
+  val rec lookup k1 = function
+    | E              -> None
+    | T(k2, v, x, y) ->
+        match X.compare k1 k2 with
+          | LT -> lookup k1 x
+          | EQ -> Some v
+          | GT -> lookup k1 y
+        end
+  end
+
+  val rec insert k1 v1 = function
+    | E               -> singleton k1 v1
+    | T(k2, v2, x, y) ->
+        match X.compare k1 k2 with
+          | LT -> T(k2, v2, insert k1 x, y)
+          | EQ -> T(k1, v1, x, y)
+          | GT -> T(k2, v2, x, insert k1 y)
+        end
+  end
+
+  val from_list = List.fold_left (fun acc (k, v) -> insert k v acc) empty
+
+  val fold_left f =
+    let val rec go e = function
+      | E               -> e
+      | T(k2, v2, x, y) ->
+          let val e' = go e x in
+          go (f k2 e' v2) y
+    end in
+    go
+
+  val fold_right f =
+    let val rec go e = function
+      | E               -> e
+      | T(k2, v2, x, y) ->
+          let val e' = go e y in
+          go (f k2 v2 e') x
+    end in
+    go
+
+  val union x y = fold_left (fun k acc v -> insert k v acc) x y
+
+  val rec delete k1 = function
+    | E               -> E
+    | T(k2, v2, x, y) ->
+        match X.compare k1 k2 with
+          | LT -> T(k2, v2, delete k1 x, y)
+          | EQ -> union x y
+          | GT -> T(k2, v2, x, delete k1 y)
+        end
+  end
+
+  val to_list = fold_right (fun k v -> List.cons (k, v)) []
+
+  val fold 'a m xs =
+    let module M = unpack m : Monoid.S where type t = 'a in
+    fold_left (const M.`<>`) M.empty xs
+
+  val rec map f = function
+    | E             -> E
+    | T(k, v, x, y) ->
+        let
+          val x' = map f x
+          val v' = f v
+          val y' = map f y
+        in
+        T(k, v', x', y')
+  end
+
+  module Monoid (X : sig type elem end) = struct
+    type t = t X.elem
+
+    val empty = empty
+    val `<>` = union
+  end
+end

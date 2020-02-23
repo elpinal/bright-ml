@@ -1,0 +1,52 @@
+module Make (X : Functor.S) : sig
+  datatype t 'a =
+    | Pure of 'a
+    | Free of X.t (t 'a)
+
+  include Monad.S where type t := t
+
+  val lift 'a : X.t 'a -> t 'a
+
+  module Lower (X : Monad.S where type t = X.t) : sig
+    val lower 'a : t 'a -> X.t 'a
+  end
+
+  val iter 'a : (X.t 'a -> 'a) -> t 'a -> 'a
+end = struct
+  datatype t 'a =
+    | Pure of 'a
+    | Free of X.t (t 'a)
+
+  val map f =
+    let val rec go x = match x with
+      | Pure x -> Pure $ f x
+      | Free x -> Free $ X.map go x
+    end in
+    go
+
+  val return = Pure
+
+  val rec apply x y = match x with
+    | Pure f -> map f y
+    | Free x -> Free $ X.map (fun x -> apply x y) x
+  end
+
+  val rec bind x f = match x with
+    | Pure x -> f x
+    | Free x -> Free $ X.map (fun x -> bind x f) x
+  end
+
+  val lift x = Free $ X.map Pure x
+
+  module Lower (X : Monad.S where type t = X.t) = struct
+    val rec lower x = match x with
+      | Pure x -> X.return x
+      | Free x -> X.bind x lower
+    end
+  end
+
+  val rec iter f = function
+    | Pure x -> x
+    | Free x -> f $ X.map (iter f) x
+  end
+end

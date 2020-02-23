@@ -1,0 +1,23 @@
+signature S = sig
+  type t 'a
+
+  val contra_map 'a 'b : ('a -> 'b) -> t 'b -> t 'a
+end
+
+module Predicate : S = struct
+  type t 'a = 'a -> bool
+
+  val contra_map f p x = p $ f x
+end
+
+module Comparison : S = struct
+  type t 'a = 'a -> 'a -> order
+
+  val contra_map f c x y = c (f x) (f y)
+end
+
+module Equivalence : S = struct
+  type t 'a = 'a -> 'a -> bool
+
+  val contra_map f eq x y = eq (f x) (f y)
+end

@@ -10,6 +10,9 @@ signature OPS = sig
 
   val `<` : t -> t -> bool
   val `>` : t -> t -> bool
+
+  val max : t -> t -> t
+  val min : t -> t -> t
 end
 
 module Make (X : S) : OPS where type t = X.t = struct
@@ -33,5 +36,17 @@ module Make (X : S) : OPS where type t = X.t = struct
   val `/=` x y = match compare x y with
     | EQ -> false
     | _  -> true
+  end
+
+  val max x y = match compare x y with
+    | LT -> y
+    | EQ -> x
+    | GT -> x
+  end
+
+  val min x y = match compare x y with
+    | LT -> x
+    | EQ -> x
+    | GT -> y
   end
 end

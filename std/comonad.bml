@@ -1,0 +1,6 @@
+signature S = sig
+  include Functor.S
+
+  val extract 'a   : t 'a -> 'a
+  val duplicate 'a : t 'a -> t (t 'a)
+end

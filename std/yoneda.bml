@@ -1,0 +1,38 @@
+module Make (X : sig
+  type t 'a
+end)  = struct
+  signature S = sig
+    type a
+    val value 'b : (a -> 'b) -> X.t 'b
+  end
+
+  datatype t 'a =
+    | In of pack (S where type a := 'a)
+
+  include struct
+    val map 'a 'b (f : 'a -> 'b) (In m) =
+      let
+        module M = unpack m : S where type a := 'a
+      in
+        In $ pack struct
+          val value g = M.value $ g <<< f
+        end : S where type a := 'b
+
+    module Lift (F : Functor.S where type t := X.t) = struct
+      val lift 'a (x : X.t 'a) =
+        In $ pack struct
+          val value 'b (f : 'a -> 'b) = F.map f x
+        end : S where type a := 'a
+    end
+
+    val lower 'a (In m) = (unpack m : S where type a := 'a).value id
+  end : sig
+    include Functor.S where type t := t
+
+    module Lift (F : Functor.S where type t := X.t) : sig
+      val lift 'a : X.t 'a -> t 'a
+    end
+
+    val lower 'a : t 'a -> X.t 'a
+  end
+end

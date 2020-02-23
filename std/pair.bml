@@ -1,0 +1,17 @@
+module Pair :> sig
+  type t 'a 'b = 'a * 'b
+
+  val fst 'a 'b : 'a * 'b -> 'a
+  val snd 'a 'b : 'a * 'b -> 'b
+
+  include Bifunctor.OPS where type t := t
+end = struct
+  val fst (x, _) = x
+  val snd (_, y) = y
+
+  include Bifunctor.Make struct
+    type t 'a 'b = 'a * 'b
+
+    val bimap f g (x, y) = (f x, g y)
+  end
+end
