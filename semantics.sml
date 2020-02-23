@@ -965,7 +965,7 @@ structure Semantics = rec (X : SEMANTICS) struct
         val p1' =
           if Filepath.eq (current, Filepath.relative "main")
           then Filepath.join [Filepath.dir path, p1]
-          else Filepath.join [current, p1]
+          else Filepath.join [Filepath.drop_ext path, p1]
         val m =
           case Filepath.Map.lookup p1 m of
                SOME () => raise DuplicateSubmodule(p1)
