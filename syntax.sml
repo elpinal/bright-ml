@@ -1,3 +1,5 @@
+open Std
+
 signature SYNTAX = rec (X : sig
   structure Signature : sig
     type t
@@ -13,6 +15,8 @@ end) sig
     datatype 'a t
       = Ident of 'a
       | Proj of X.Module.t * 'a
+
+    val show : ('a -> string) -> 'a t -> string
   end
 
   structure Type : sig
@@ -93,6 +97,8 @@ end) sig
 
     withtype branch = Pattern.untyped * t
     and branches = (Pattern.untyped * t) list
+
+    val show : t -> string
   end
 
   type datatype_binding = type_ident * type_vars * Type.t option ConstrID.Map.t
@@ -144,6 +150,8 @@ end) sig
       | Module of module_ident * X.Module.param list * signature_ann * X.Module.t
       | Signature of signature_ident * Signature.t
       | Include of X.Module.t
+
+    val show : t -> string
   end
 
   structure Module : sig
@@ -165,6 +173,9 @@ end) sig
       | Bindings of bindings
       | Let of bindings * t
       | Unpack of Expr.t * Signature.t
+
+    val show_bindings : bindings -> string
+    val show : t -> string
   end
 
   structure Unit : sig
@@ -173,6 +184,8 @@ end) sig
       | Bind of module_ident * string
 
     type t = submodule list * Module.bindings
+
+    val show : t -> string
   end
 end
 
@@ -184,9 +197,9 @@ structure Syntax : SYNTAX = rec (X : SYNTAX) struct
   structure Literal = struct
     datatype t = datatype X.Literal.t
 
-    fun show (Int n) = Int.toString n
-      | show (Bool b) = Bool.toString b
-      | show (Char c) = Char.toString c
+    fun show (Int n)    = Int.toString n
+      | show (Bool b)   = Bool.toString b
+      | show (Char c)   = Char.toString c
       | show (String s) = String.toString s
       | show Unit       = "()"
   end
@@ -246,6 +259,12 @@ structure Syntax : SYNTAX = rec (X : SYNTAX) struct
     type branch = X.Expr.branch
     type branches = X.Expr.branches
     datatype t = datatype X.Expr.t
+
+    local open Pretty in
+      fun show (Path p) = X.Path.show ValID.get_name p
+        | show (Lit l)  = Literal.show l
+        | show _        = raise TODO
+    end
   end
 
   type datatype_binding = X.datatype_binding
@@ -264,6 +283,12 @@ structure Syntax : SYNTAX = rec (X : SYNTAX) struct
     datatype val_binding = datatype X.Binding.val_binding
     datatype signature_ann = datatype X.Binding.signature_ann
     datatype t = datatype X.Binding.t
+
+    local open Pretty in
+      fun show (Val(V(p, e)))        = "val" <+> Pattern.show p <+> "=" <+> Expr.show e
+        | show (Module(id, _, _, m)) = "module" <+> ModuleID.get_name id <+> "..." <+> "=" <+> X.Module.show m
+        | show _                     = raise TODO
+    end
   end
 
   structure Module = struct
@@ -271,15 +296,33 @@ structure Syntax : SYNTAX = rec (X : SYNTAX) struct
     type param = X.Module.param
     type params = X.Module.params
     datatype t = datatype X.Module.t
+
+    local open Pretty in
+      fun show_bindings Nil           = ""
+        | show_bindings (Cons(b, bs)) = Binding.show b <+> show_bindings bs
+        | show_bindings _             = raise TODO
+
+      fun show (Ident id)    = ModuleID.get_name id
+        | show (Proj(m, id)) = show m <> "." <> ModuleID.get_name id
+        | show (Bindings bs) = "struct" <+> show_bindings bs <+> "end"
+        | show _             = raise TODO
+    end
   end
 
   structure Path = struct
     datatype t = datatype X.Path.t
+
+    local open Pretty in
+      fun show f (Ident id)    = f id
+        | show f (Proj(m, id)) = Module.show m <> "." <> f id
+    end
   end
 
   structure Unit = struct
     datatype submodule = datatype X.Unit.submodule
 
     type t = X.Unit.t
+
+    fun show (_, bs) = Module.show_bindings bs
   end
 end
