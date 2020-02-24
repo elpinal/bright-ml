@@ -997,8 +997,27 @@ structure Semantics = rec (X : SEMANTICS) struct
       end
     in
       foldl (fn (s, acc) => acc >>= f s) (Right ((Quantified.from_body SS.Structure.empty, fn x => x, Filepath.Map.empty), env)) ss >>= (fn ((e1, t1_f, _), env1) =>
-        let val (e2, t2) = Module.elaborate_bindings env1 bs in
-          Right(Quantified.merge SS.Structure.merge e1 e2, t1_f t2)
+        let
+          val (e2, t2) = Module.elaborate_bindings env1 bs
+          val e = Quantified.merge SS.Structure.merge e1 e2
+
+          val v = ValVar.fresh ()
+          structure M2 as S = Quantified.get_body e2
+          structure N as S = Quantified.get_body e
+
+          fun g label acc id _ =
+            Record.insert (label id) (Term.var $ ValVar.from_label $ label id) acc
+
+          val t = Term.record $ ModuleID.Map.fold_left (g Label.module) (ValID.Map.fold_left (g Label.value) Record.empty N.v) N.m
+
+          val t =
+            Term.let_ v t2 $
+              ModuleID.Map.fold_left
+                (Expr.f_m v)
+                (ValID.Map.fold_left (Expr.f_v v) t M2.v)
+                M2.m
+        in
+          Right(e, t1_f t)
         end
       )
     end
