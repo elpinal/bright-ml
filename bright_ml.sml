@@ -13,7 +13,11 @@ end = struct
     | LexerError.Illegal(SOME c)          => Left("illegal character: " ^ Char.toString c)
 
   fun elaborate filepath u =
+  let
+    (* val () = print $ Syntax.Unit.show u ^ "\n" *)
+  in
     #2 <$> Semantics.Unit.elaborate Env.initial (filepath, parse_file) u
+  end
     handle
       IType.StructuralMismatch(x, y) => Left("structural mismatch: " ^ IType.show x ^ " vs " ^ IType.show y)
     | Semantics.Pattern.NotExhaustive s => Left("not exhaustive: " ^ Space.show s)

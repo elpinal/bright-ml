@@ -54,7 +54,7 @@ structure Parser = MakeParser (struct
       val (s, ss) = NonEmpty.uncons ss
       val (ss, s) = last s ss
     in
-      Path.Proj(List.foldl (fn (s, acc) => Module.Proj(m, ModuleID.from_string s)) m ss, f s)
+      Path.Proj(List.foldl (fn (s, acc) => Module.Proj(acc, ModuleID.from_string s)) m ss, f s)
     end
 
     fun module_atom m = m
