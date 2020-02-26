@@ -88,6 +88,7 @@ nonterminal Module : module =
   1:ModuleFunctor                    => module_functor
   1:ModuleApp 2:ModuleFunctor        => app_to_functor
   UNPACK 1:ExprApp COLON 2:Signature => unpack
+  LET 1:Bindings IN 2:Module         => let_module
 
 nonterminal ModuleFunctor : module =
   FUNCTOR 1:MParams RARROW 2:Module => functor_

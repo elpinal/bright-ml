@@ -83,6 +83,7 @@ structure Parser = MakeParser (struct
       fun functor_ (ps, m) = Fun(ps, m)
       fun app_to_functor (m1, f) = App(m1, f)
       fun unpack (e, s) = Unpack(e, s)
+      val let_module = Let
 
       fun empty_bindings () = Nil
       val cons_bindings = Cons

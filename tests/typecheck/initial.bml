@@ -55,3 +55,5 @@ val _ : int = open M in z + z
 val _ : int = let include M in z + z
 
 val _ : int = let open M val r = z * 2 in r + r
+
+module M = let module M = struct end in M
