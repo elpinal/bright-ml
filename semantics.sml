@@ -391,6 +391,10 @@ structure Semantics = rec (X : SEMANTICS) struct
           in
             elaborate env $ App(App(Path (Path.Ident id), x), y)
           end
+      | elaborate env (Open(m, x)) =
+          let open Syntax in
+            elaborate env $ Let(Module.Cons(Binding.Include m, Module.Nil), x)
+          end
   end
 
   structure Type = struct

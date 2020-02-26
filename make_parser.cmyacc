@@ -232,6 +232,7 @@ nonterminal Expr : expr =
   1:ExprApp                         => expr_app
   1:ExprBin_                        => expr_binary
   LET 1:Bindings IN 2:Expr          => let_expr
+  OPEN 1:Module IN 2:Expr           => open_in
   FUN 1:Params RARROW 2:Expr        => lambda
   IF 1:Expr THEN 2:Expr ELSE 3:Expr => if_expr
   MATCH 1:Expr WITH 2:Branches END  => match

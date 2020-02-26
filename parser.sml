@@ -216,6 +216,7 @@ structure Parser = MakeParser (struct
       fun val_ident s = Path(Path.Ident $ ValID.from_string s)
       fun expr_path (m, ss) = Path(from_uids1 m ss ValID.from_string)
       val let_expr = Let
+      val open_in = Open
       val lambda = Abs
       val app = App
       val if_expr = If

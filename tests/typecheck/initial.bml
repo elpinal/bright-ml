@@ -45,3 +45,13 @@ end
 val _ : int = 55
 
 val _ : unit = ()
+
+module M = struct
+  val z = 1
+end
+
+val _ : int = open M in z + z
+
+val _ : int = let include M in z + z
+
+val _ : int = let open M val r = z * 2 in r + r
