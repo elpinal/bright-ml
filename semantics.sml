@@ -556,7 +556,7 @@ structure Semantics = rec (X : SEMANTICS) struct
           Quantified.map_with_location
             (SS.Structure.singleton_module id)
             (fn (mids, tid) => (id :: mids, tid))
-            (X.Signature.elaborate env $ foldr (fn ((id, s1), s2) => Syntax.Signature.Fun(id, s1, s2)) s ps)
+            (X.Signature.elaborate env $ foldr (fn ((id, s1), s2) => Syntax.Signature.Fun(SOME id, s1, s2)) s ps)
       | elaborate env (Signature(id, s)) =
           Quantified.from_body $ SS.Structure.singleton_signature id $ SS.Signature.In $
             X.Signature.elaborate env s
@@ -611,10 +611,13 @@ structure Semantics = rec (X : SEMANTICS) struct
           in
             Quantified.map (SS.Module.subst (!r)) asig'
           end
-      | elaborate env (Fun(id, x, y)) =
+      | elaborate env (Fun(id_opt, x, y)) =
           let
             val asig1 = elaborate env x
-            val env1 = Env.Module.insert env id $ Quantified.get_body asig1
+            val env1 =
+              case id_opt of
+                   SOME id => Env.Module.insert env id $ Quantified.get_body asig1
+                 | NONE    => env
             val asig2 = elaborate env1 y
           in
             Quantified.from_body $ SS.Module.F $ Quantified.map (fn s1 => (s1, asig2)) asig1
