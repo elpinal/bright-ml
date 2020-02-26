@@ -121,6 +121,7 @@ end) sig
     val to_type : t -> IType.t
     val to_type_abstract : abstract -> IType.t
     val normalize_abstract : abstract -> abstract
+    val refresh : abstract -> abstract
   end
 end
 
@@ -625,6 +626,18 @@ structure SemanticSignature : S = rec (X : S) struct
     end
 
     fun normalize_abstract asig = asig (* TODO *)
+
+    fun refresh asig =
+    let
+      val r = ref Internal.BoundID.Map.empty
+
+      val asig' = asig |> Quantified.rename_bound_vars (fn bid =>
+        let val new_bid = Internal.BoundID.refresh bid in
+          new_bid before r := Internal.BoundID.Map.insert bid (IType.bound new_bid) (!r)
+        end)
+    in
+      Quantified.map (subst (!r)) asig'
+    end
   end
 end
 

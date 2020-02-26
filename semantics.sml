@@ -601,15 +601,8 @@ structure Semantics = rec (X : SEMANTICS) struct
             end
 
             val (SS.Signature.In asig, ()) = M.elaborate env p
-
-            val r = ref BoundID.Map.empty
-
-            val asig' = asig |> Quantified.rename_bound_vars (fn bid =>
-              let val new_bid = BoundID.refresh bid in
-                new_bid before r := BoundID.Map.insert bid (IType.bound new_bid) (!r)
-              end)
           in
-            Quantified.map (SS.Module.subst (!r)) asig'
+            SS.Module.refresh asig
           end
       | elaborate env (Fun(id_opt, x, y)) =
           let
@@ -862,7 +855,7 @@ structure Semantics = rec (X : SEMANTICS) struct
             val u = SS.Module.get_functor $ Quantified.get_body asig1
             val (asig2, t2) = elaborate env y
             val bid_map = SS.Module.match (Quantified.get_body asig2) (Quantified.map #1 u)
-            val asig = Quantified.map (fn s3 => SS.Module.subst bid_map s3) (#2 (Quantified.get_body u))
+            val asig = Quantified.map (SS.Module.subst bid_map) $ SS.Module.refresh $ #2 $ Quantified.get_body u
             val ex = Quantified.merge (fn _ => fn _ => ()) asig1 asig2
           in
             ( Quantified.merge (fn _ => fn s => s) ex asig
