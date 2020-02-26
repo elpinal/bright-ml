@@ -315,6 +315,7 @@ nonterminal Literal : literal =
   1:CHAR   => char_literal
   FALSE    => bool_false
   TRUE     => bool_true
+  LPAREN RPAREN => unit_literal
 
 nonterminal Params : params =
   1:PatternAtom          => param1

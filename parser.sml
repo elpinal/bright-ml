@@ -208,6 +208,7 @@ structure Parser = MakeParser (struct
       fun string_literal s = String s
       fun bool_false () = Bool false
       fun bool_true () = Bool true
+      fun unit_literal () = Unit
     end
 
     local open Expr BinOp in
