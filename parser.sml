@@ -335,8 +335,8 @@ structure Parser = MakeParser (struct
       type program_unit = t
       type submodule = submodule
 
-      fun submodule_include s = Include s
-      fun submodule_bind (id, s) = Bind(ModuleID.from_string id, s)
+      fun submodule_include s = Include $ Relative s
+      fun submodule_bind (id, s) = Bind(ModuleID.from_string id, Relative s)
 
       fun unit_bindings bs = ([], bs)
       fun unit_cons (s, (ss, bs)) = (s :: ss, bs)

@@ -180,9 +180,13 @@ end) sig
   end
 
   structure Unit : sig
+    datatype submodule_path
+      = Std
+      | Relative of string
+
     datatype submodule
-      = Include of string
-      | Bind of module_ident * string
+      = Include of submodule_path
+      | Bind of module_ident * submodule_path
 
     type t = submodule list * Module.bindings
 
@@ -320,6 +324,7 @@ structure Syntax : SYNTAX = rec (X : SYNTAX) struct
   end
 
   structure Unit = struct
+    datatype submodule_path = datatype X.Unit.submodule_path
     datatype submodule = datatype X.Unit.submodule
 
     type t = X.Unit.t

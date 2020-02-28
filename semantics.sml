@@ -951,8 +951,18 @@ structure Semantics = rec (X : SEMANTICS) struct
       then s
       else raise InvalidFilename(s)
 
-    fun get_filepath (Include s)  = Filepath.relative $ check s ^ ".bml"
-      | get_filepath (Bind(_, s)) = Filepath.relative $ check s ^ ".bml"
+    exception UndefinedBMLPath
+
+    fun get_bml_path () =
+      case OS.Process.getEnv "BML_PATH" of
+           SOME p => Filepath.relative $ p
+         | NONE   => raise UndefinedBMLPath
+
+    fun get_filepath' (Relative s) = Filepath.relative $ check s ^ ".bml"
+      | get_filepath' Std          = Filepath.join [get_bml_path (), Filepath.relative "std", Filepath.relative "main.bml"]
+
+    fun get_filepath (Include s)  = get_filepath' s
+      | get_filepath (Bind(_, s)) = get_filepath' s
 
     exception DuplicateSubmodule of Filepath.relative
 
