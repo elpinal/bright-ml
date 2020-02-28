@@ -191,6 +191,8 @@ end) sig
     type t = submodule list * Module.bindings
 
     val show : t -> string
+
+    val add_std : t -> t
   end
 end
 
@@ -330,5 +332,7 @@ structure Syntax : SYNTAX = rec (X : SYNTAX) struct
     type t = X.Unit.t
 
     fun show (_, bs) = Module.show_bindings bs
+
+    fun add_std (ss, bs) = (Include Std :: ss, bs)
   end
 end

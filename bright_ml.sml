@@ -16,12 +16,13 @@ end = struct
   let
     (* val () = print $ Syntax.Unit.show u ^ "\n" *)
   in
-    #2 <$> Semantics.Unit.elaborate Env.initial (filepath, parse_file) u
+    #2 <$> Semantics.Unit.elaborate Env.initial (filepath, parse_file) (Syntax.Unit.add_std u)
   end
     handle
-      IType.StructuralMismatch(x, y) => Left("structural mismatch: " ^ IType.show x ^ " vs " ^ IType.show y)
+      IType.StructuralMismatch(x, y)    => Left("structural mismatch: " ^ IType.show x ^ " vs " ^ IType.show y)
     | Semantics.Pattern.NotExhaustive s => Left("not exhaustive: " ^ Space.show s)
     | Semantics.Pattern.Redundant(s, p) => Left("redundant pattern: " ^ Syntax.Pattern.show p ^ ": " ^ Space.show s)
+    | Semantics.Unit.UndefinedBMLPath   => Left("environment variable '$BML_PATH' needs to be set to load the standard library")
 
   fun interpret t =
   (* let val () = print (Internal.Term.show t ^ "\n") in *)

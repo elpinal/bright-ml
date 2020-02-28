@@ -46,6 +46,11 @@ func (e *Error) Error() string {
 }
 
 func run(d string, args []string) (n int, err error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		return n, err
+	}
+
 	dir := filepath.Join("tests", d)
 	f, err := os.Open(dir)
 	if err != nil {
@@ -66,6 +71,7 @@ func run(d string, args []string) (n int, err error) {
 		var buf bytes.Buffer
 		cmd := exec.Command("./bright-ml", append(args, filepath.Join(dir, name))...)
 		cmd.Stderr = &buf
+		cmd.Env = append(os.Environ(), "BML_PATH="+pwd)
 		if err := cmd.Run(); err != nil {
 			return n, &Error{err: errors.Wrap(err, name), stderr: buf.String()}
 		}

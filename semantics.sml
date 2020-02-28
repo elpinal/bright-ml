@@ -951,15 +951,19 @@ structure Semantics = rec (X : SEMANTICS) struct
       then s
       else raise InvalidFilename(s)
 
+    datatype either
+      = InL of Filepath.relative
+      | InR of Filepath.relative
+
     exception UndefinedBMLPath
 
     fun get_bml_path () =
       case OS.Process.getEnv "BML_PATH" of
-           SOME p => Filepath.relative $ p
+           SOME p => Filepath.relative p
          | NONE   => raise UndefinedBMLPath
 
-    fun get_filepath' (Relative s) = Filepath.relative $ check s ^ ".bml"
-      | get_filepath' Std          = Filepath.join [get_bml_path (), Filepath.relative "std", Filepath.relative "main.bml"]
+    fun get_filepath' (Relative s) = InL $ Filepath.relative $ check s ^ ".bml"
+      | get_filepath' Std          = InR $ Filepath.join [get_bml_path (), Filepath.relative "std", Filepath.relative "main.bml"]
 
     fun get_filepath (Include s)  = get_filepath' s
       | get_filepath (Bind(_, s)) = get_filepath' s
@@ -973,13 +977,19 @@ structure Semantics = rec (X : SEMANTICS) struct
         val p1 = get_filepath s
         val current = Filepath.drop_ext $ Filepath.basename path
         val p1' =
-          if Filepath.eq (current, Filepath.relative "main")
-          then Filepath.join [Filepath.dir path, p1]
-          else Filepath.join [Filepath.drop_ext path, p1]
+          case p1 of
+               InL p1 =>
+                 if Filepath.eq (current, Filepath.relative "main")
+                 then Filepath.join [Filepath.dir path, p1]
+                 else Filepath.join [Filepath.drop_ext path, p1]
+             | InR p1 => p1
         val m =
-          case Filepath.Map.lookup p1 m of
-               SOME () => raise DuplicateSubmodule(p1)
-             | NONE    => Filepath.Map.insert p1 () m
+          case p1 of
+               InR _  => m
+             | InL p1 =>
+                 case Filepath.Map.lookup p1 m of
+                      SOME () => raise DuplicateSubmodule(p1)
+                    | NONE    => Filepath.Map.insert p1 () m
         val res = parse p1' >>= elaborate env0 (p1', parse)
       in
         res >>= Right o (fn (e2, t2) =>
