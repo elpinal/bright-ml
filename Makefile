@@ -26,4 +26,11 @@ run: all
 test:
 	go run test.go
 
-.PHONY: all lib cmlib run test
+
+install:
+ifndef PREFIX
+	$(error PREFIX is not set)
+endif
+	cp ./bright-ml $(PREFIX)/bright-ml
+
+.PHONY: all lib cmlib run test install
