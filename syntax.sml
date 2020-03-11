@@ -95,6 +95,7 @@ end) sig
       | Pack of X.Module.t * X.Signature.t
       | BinOp of BinOp.t * t * t
       | Open of X.Module.t * t
+      | ValOp of val_ident * Pattern.untyped * t * t
 
     withtype branch = Pattern.untyped * t
     and branches = (Pattern.untyped * t) list

@@ -7,6 +7,7 @@ terminal CHAR of char
 terminal LOWER_IDENT of string
 terminal UPPER_IDENT of string
 terminal QUOTE_IDENT of string
+terminal VAL_OP of string
 
 terminal EQUAL
 terminal COLON
@@ -239,6 +240,7 @@ nonterminal Expr : expr =
   MATCH 1:Expr WITH 2:Branches END  => match
   FUNCTION 1:Branches END           => function
   PACK 1:ModuleApp COLON 2:Signature => pack
+  1:VAL_OP 2:Pattern EQUAL 3:Expr IN 4:Expr => val_op
 
 nonterminal ExprBin_ : expr =
   1:ExprBin COLON_COLON 2:Expr => cons_list_expr

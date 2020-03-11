@@ -305,6 +305,9 @@ functor Lexer (X : sig end) = MakeLexer (struct
     let val (s, rest) = parse_backquote_ident follow in
       Stream.lazy (fn () => Stream.Cons(LOWER_IDENT s, #lex self rest))
     end
+
+    fun val_op ({match, self, follow, ...} : info) =
+      Stream.lazy (fn () => Stream.Cons(VAL_OP(String.implode $ List.drop (match, 3)), #lex self follow))
   end
 end)
 

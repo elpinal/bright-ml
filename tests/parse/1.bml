@@ -175,3 +175,8 @@ val f' x'y' = x'+y'
 val f' = 'x'
 
 val `<>` x y = concat_string
+
+val _ =
+  val+ (x, y) = e in
+  val+ _ = e in
+  3

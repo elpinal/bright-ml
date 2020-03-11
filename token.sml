@@ -24,6 +24,7 @@ structure Token = struct
     | LOWER_IDENT of string
     | UPPER_IDENT of string
     | QUOTE_IDENT of string
+    | VAL_OP of string
 
     | EQUAL
     | COLON
@@ -98,6 +99,7 @@ structure Token = struct
     | show (LOWER_IDENT s) = s
     | show (UPPER_IDENT s) = s
     | show (QUOTE_IDENT s) = "'" ^ s
+    | show (VAL_OP s)      = "val" ^ s
 
     | show EQUAL       = "="
     | show COLON       = ":"

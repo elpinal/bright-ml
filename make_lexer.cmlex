@@ -10,6 +10,7 @@ set upper = (range 'A 'Z)
 set alpha = (or lower upper)
 set alphanumeric = (or digit alpha)
 set ident = (or '_ alphanumeric)
+set val_op_char = (or '+ '* '! '?)
 
 set whitechar = (or 32 9 10)  /* space, tab, lf */
 
@@ -52,6 +53,7 @@ function lex : t =
   (seq upper (* ident) (* ''))       => upper_ident
   (seq 'r '# lower (* ident) (* '')) => raw_ident
   (seq '')                           => single_quote
+  (seq "val" (+ val_op_char))        => val_op
   '` => backquote_ident
   '. => dot
   (+ whitechar) => whitespace

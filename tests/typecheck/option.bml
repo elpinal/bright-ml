@@ -29,6 +29,8 @@ signature OPTION = sig
 
   val unwrap_or 'a : 'a -> t 'a -> 'a
   val map_or 'a 'b : 'b -> ('a -> 'b) -> t 'a -> 'b
+
+  val `val+` 'a 'b : t 'a -> ('a -> t 'b) -> t 'b
 end
 
 module Option :> OPTION = struct
@@ -72,4 +74,20 @@ module Option :> OPTION = struct
     | None   -> def
     | Some x -> f x
   end
+
+  val `val+` = bind
 end
+
+open Option
+
+val _ =
+  val+ x = Some 4 in
+  val+ y = Some 8 in
+  return $ x + y
+
+val _ =
+  val+ x = Some 4 in
+  val+ y = Some x in
+  return $ x + y
+
+val `val+` x y = x + y

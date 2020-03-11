@@ -395,6 +395,12 @@ structure Semantics = rec (X : SEMANTICS) struct
           let open Syntax in
             elaborate env $ Let(Module.Cons(Binding.Include m, Module.Nil), x)
           end
+      | elaborate env (ValOp(op_id, p, e1, e2)) =
+          let
+            val op_id = Path $ Syntax.Path.Ident op_id
+          in
+            elaborate env $ App(App(op_id, e1), Abs(NonEmpty.singleton p, e2))
+          end
   end
 
   structure Type = struct

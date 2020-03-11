@@ -226,6 +226,7 @@ structure Parser = MakeParser (struct
       fun pack (m, s) = Pack(m, s)
       fun list es = List es
       fun cons_list_expr (e, es) = ConsList(e, es)
+      fun val_op (s, p, e1, e2) = ValOp(ValID.from_string $ "val" ^ s, p, e1, e2)
 
       type expr_list = expr list
 
