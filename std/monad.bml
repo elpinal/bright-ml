@@ -3,3 +3,20 @@ signature S = sig
 
   val bind 'a 'b : t 'a -> ('a -> t 'b) -> t 'b
 end
+
+signature OPS = sig
+  include S
+
+  val `val+` 'a 'b : t 'a -> ('a -> t 'b) -> t 'b
+  val join 'a      : t (t 'a) -> t 'a
+end
+
+module Make (X : S) : OPS where type t = X.t = struct
+  include X
+
+  val `val+` = bind
+
+  val join m =
+    val+ m' = m in
+    m'
+end
