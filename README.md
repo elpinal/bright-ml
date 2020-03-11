@@ -13,6 +13,7 @@ This repository contains an interpreter of Bright ML, written in Moscow ML.
   - No value restriction
   - Bottom type (empty datatypes)
   - Exhaustivity and redundancy check of patterns
+  - Binding operators
 
 ## Getting started
 
@@ -353,6 +354,30 @@ open struct
   val z = succ x
   // We cannot apply `succ` to `y` because `y` has type `M.t bool'`.
   // val z = succ y
+end
+```
+
+### Binding operators
+
+Bright ML supports binding operators [like OCaml](https://caml.inria.fr/pub/docs/manual-ocaml-4.10/bindingops.html),
+making monadic operations handy.
+
+```
+// Define `val+` as a binding operator.
+val `val+` x f =
+  match x with
+    | None   -> None
+    | Some x -> f x
+  end
+
+include struct
+  val f a b =
+    // `a` has type `option int` while `x` has type `int`.
+    val+ x = a in
+    val+ y = b in
+    Some $ x * y
+end : sig
+  val f : option int -> option int -> option int
 end
 ```
 
