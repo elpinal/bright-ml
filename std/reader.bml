@@ -1,5 +1,5 @@
 module Reader (X : sig type t end) :> sig
-  include Monad.S
+  include Monad.OPS
   type u = X.t
 
   val ask        : t u
@@ -9,15 +9,18 @@ module Reader (X : sig type t end) :> sig
   val run 'a : u -> t 'a -> 'a
 end = struct
   type u = X.t
-  type t 'a = u -> 'a
 
-  val map f g = f <<< g
+  include Monad.Make struct
+    type t 'a = u -> 'a
 
-  val return x _ = x
+    val map f g = f <<< g
 
-  val apply f x v = f v $ x v
+    val return x _ = x
 
-  val bind x f v = f (x v) v
+    val apply f x v = f v $ x v
+
+    val bind x f v = f (x v) v
+  end
 
   val ask = id
 

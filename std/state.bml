@@ -1,5 +1,5 @@
 module State (X : sig type t end) :> sig
-  include Monad.S
+  include Monad.OPS
   type u = X.t
 
   val get     : t u
@@ -14,19 +14,22 @@ end = struct
   open X
 
   type u = X.t
-  type t 'a = u -> 'a * u
 
-  val map f g s = Pair.first f $ g s
+  include Monad.Make struct
+    type t 'a = u -> 'a * u
 
-  val return x s = (x, s)
+    val map f g s = Pair.first f $ g s
 
-  val apply f x s =
-    let val (f, s') = f s in
-    Pair.first f $ x s'
+    val return x s = (x, s)
 
-  val bind x f s =
-    let val (x, s') = x s in
-    f x s'
+    val apply f x s =
+      let val (f, s') = f s in
+      Pair.first f $ x s'
+
+    val bind x f s =
+      let val (x, s') = x s in
+      f x s'
+  end
 
   val get s = (s, s)
 

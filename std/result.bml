@@ -23,7 +23,7 @@ module Result :> sig
 
   module Monad (X : sig type e end) : sig
     type t 'a = t X.e 'a
-    include Monad.S where type t := t
+    include Monad.OPS where type t := t
   end
 end = struct
   datatype result 'e 'a =
@@ -88,10 +88,7 @@ end = struct
     val bimap f g = map_err f <<< map g
   end
 
-  module Monad (X : sig type e end) : sig
-    type t 'a = t X.e 'a
-    include Monad.S where type t := t
-  end = struct
+  module Monad (X : sig type e end) = Monad.Make struct
     type t 'a = t X.e 'a
 
     val map = map

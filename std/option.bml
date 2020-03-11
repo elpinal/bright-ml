@@ -11,7 +11,7 @@ module Option :> sig
   val unwrap_or 'a : 'a -> t 'a -> 'a
   val map_or 'a 'b : 'b -> ('a -> 'b) -> t 'a -> 'b
 
-  include Monad.S where type t := t
+  include Monad.OPS where type t := t
   include Alternative.S where type t := t
 end = struct
   datatype option 'a =
@@ -30,21 +30,25 @@ end = struct
     | Some _ -> true
   end
 
-  val map f = function
-    | None   -> None
-    | Some x -> Some $ f x
-  end
+  include Monad.Make struct
+    type t = t
 
-  val return = Some
+    val map f = function
+      | None   -> None
+      | Some x -> Some $ f x
+    end
 
-  val apply a b = match a with
-    | None   -> None
-    | Some f -> map f b
-  end
+    val return = Some
 
-  val bind v f = match v with
-    | None   -> None
-    | Some x -> f x
+    val apply a b = match a with
+      | None   -> None
+      | Some f -> map f b
+    end
+
+    val bind v f = match v with
+      | None   -> None
+      | Some x -> f x
+    end
   end
 
   val unwrap_or def = function
