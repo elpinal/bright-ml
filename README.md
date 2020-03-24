@@ -74,7 +74,7 @@ include M
 open M
 
 // Like Haskell's `$`, `$` can be used to omit parentheses for function applications.
-val _ = succ $ succ n   // Syntactically the same as `succ (succ n)`
+val _ = succ $ succ n   // Syntactically the same as `succ (succ n)`.
 ```
 
 ### Mutually-recursive definitions
@@ -122,7 +122,7 @@ module F (X : (Y : S) -> S) = struct
     in M.f "a"
 end
 
-// `where type`
+// Signature refinement: `where type`.
 signature T = S where type t = int
 
 // `let` can be used inside types.
@@ -156,7 +156,7 @@ include struct
   end
 end
 
-// We cannot access `C`
+// We cannot access `C`.
 // val _ = C
 
 val _ = f $ f y
