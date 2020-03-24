@@ -34,6 +34,8 @@ func main() {
 		}
 		os.Exit(1)
 	}
+
+	fmt.Println("Test(grammar) succeeded: unambiguous grammar")
 }
 
 type Error struct {
