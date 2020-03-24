@@ -2,13 +2,12 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 func main() {
@@ -39,11 +38,15 @@ func main() {
 }
 
 type Error struct {
-	err    error
-	stderr string
+	err      error
+	stderr   string
+	filename string
 }
 
 func (e *Error) Error() string {
+	if e.filename != "" {
+		return fmt.Sprintf("%s: %s", e.filename, e.err.Error())
+	}
 	return e.err.Error()
 }
 
@@ -75,7 +78,7 @@ func run(d string, args []string) (n int, err error) {
 		cmd.Stderr = &buf
 		cmd.Env = append(os.Environ(), "BML_PATH="+pwd)
 		if err := cmd.Run(); err != nil {
-			return n, &Error{err: errors.Wrap(err, name), stderr: buf.String()}
+			return n, &Error{err: err, filename: name, stderr: buf.String()}
 		}
 		n++
 	}
