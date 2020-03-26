@@ -214,6 +214,7 @@ nonterminal SigWhere : signature_ =
 nonterminal SigAtom : signature_ =
   LPAREN 1:Signature RPAREN => paren_signature
   SIG 1:Decls END           => decls
+  LBRACE 1:Decls RBRACE     => decls
   1:UPPER_IDENT             => signature_ident
   1:Path 2:UIDs1            => sig_path
 

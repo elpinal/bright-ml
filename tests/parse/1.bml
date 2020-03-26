@@ -206,3 +206,25 @@ module A = Mod.F {type t = int}
 
 
 val _ = {val x = 1}.x
+
+signature S = {
+}
+
+signature S = (X : sig type t 'a end) -> sig type t = X.t int end
+
+signature S = (X : {type t 'a}) -> {type t = X.t int}
+
+
+module F (X : (Y : S) -> sig type t = Y.a * Y.a end) = struct
+  val x = 128
+  signature U = sig
+    type t = (X struct type a = int val x = x end).t
+  end
+end
+
+module F (X : (Y : S) -> {type t = Y.a * Y.a}) = {
+  val x = 128
+  signature U = {
+    type t = (X {type a = int val x = x}).t
+  }
+}
