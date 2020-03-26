@@ -75,6 +75,8 @@ structure Parser = MakeParser (struct
       fun aux m ids = List.foldl (fn (id, acc) => Proj(acc, id)) m ids
 
       fun bindings (bs, p) = aux (Bindings bs) p
+      fun bindings0 bs = Bindings bs
+      fun bindings1 (bs, id, p) = aux (Proj(Bindings bs, ModuleID.from_string id)) p
       fun module_ident (s, p) = aux (path_module_ident s) p
       fun proj (m, s, p) = aux (Proj(m, ModuleID.from_string s)) p
       val app_module = App

@@ -8,13 +8,14 @@ structure Token = struct
     = LPAREN of left_paren_kind ref
     | RPAREN
 
-    | LBRACE
+    | LBRACE of left_paren_kind ref
     | RBRACE
 
     | LBRACK
     | RBRACK
 
     | LPAREN_PROJ
+    | LBRACE_PROJ
 
     | DOT
 
@@ -84,12 +85,13 @@ structure Token = struct
 
   fun show (LPAREN _) = "("
     | show RPAREN     = ")"
-    | show LBRACE     = "{"
+    | show (LBRACE _) = "{"
     | show RBRACE     = "}"
     | show LBRACK     = "["
     | show RBRACK     = "]"
 
     | show LPAREN_PROJ = "("
+    | show LBRACE_PROJ = "{"
 
     | show DOT = "."
 

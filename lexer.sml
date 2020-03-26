@@ -31,6 +31,7 @@ functor Lexer (X : sig end) = MakeLexer (struct
                   self : self }
 
     val left_paren_kind_stack = ref []
+    val left_brace_kind_stack = ref []
 
     open LexerError
 
@@ -182,8 +183,28 @@ functor Lexer (X : sig end) = MakeLexer (struct
       eager_follow info RPAREN
     end
 
-    fun lbrace info = eager_follow info LBRACE
-    fun rbrace info = eager_follow info RBRACE
+    fun lbrace info =
+    let
+      val r = ref Token.Normal
+      val () = left_brace_kind_stack := r :: (!left_brace_kind_stack)
+    in
+      eager_follow info (LBRACE r)
+    end
+
+    fun rbrace info =
+    let
+      val () =
+        case !left_brace_kind_stack of
+             []      => raise Std.Unreachable
+           | r :: rs =>
+               let val () = left_brace_kind_stack := rs in
+                 case stream_head (#follow info) of
+                      SOME(#".") => r := Token.DotInRight
+                    | _          => ()
+               end
+    in
+      eager_follow info RBRACE
+    end
 
     fun lbrack info = eager_follow info LBRACK
     fun rbrack info = eager_follow info RBRACK
@@ -320,6 +341,12 @@ end = struct
           case !r of
                DotInRight => LPAREN_PROJ
              | _          => LPAREN r
+        end
+    | f (LBRACE r) =
+        let in
+          case !r of
+               DotInRight => LBRACE_PROJ
+             | _          => LBRACE r
         end
     | f t = t
 
