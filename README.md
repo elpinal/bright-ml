@@ -243,7 +243,8 @@ end
 ```
 // Implicit quantification is one of the virtues of ML.
 val id x = x
-// If we want to annotate `x` with a type which contains type variables, we need to explicitly bound them.
+// If we want to annotate `x` with a type which contains type variables,
+// we need to explicitly bound them.
 val id 'a (x : 'a) = x
 
 // This form is ill-typed because `'a` is an unbound type variable.
@@ -290,7 +291,9 @@ module M : sig
   val v 'a : list ('a -> 'a)
 end = struct
   val id x = x
-  val v = id [fun x -> x] // This expression can be given a polymorphic type while it is not a syntactic value.
+
+  // This expression can be given a polymorphic type while it is not a syntactic value.
+  val v = id [fun x -> x]
 end
 ```
 
