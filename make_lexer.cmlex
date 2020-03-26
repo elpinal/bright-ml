@@ -33,13 +33,13 @@ function lex : t =
   '- => minus
   '> => gt
   '< => lt
-  (seq '> '=) => gt_eq
-  (seq '< '=) => lt_eq
+  (seq '> '=)    => gt_eq
+  (seq '< '=)    => lt_eq
   (seq '> '> '>) => gt_gt_gt
   (seq '< '< '<) => lt_lt_lt
-  (seq '= '=) => equal_equal
-  (seq '/ '=) => slash_equal
-  (seq '< '>) => lt_gt
+  (seq '= '=)    => equal_equal
+  (seq '/ '=)    => slash_equal
+  (seq '< '>)    => lt_gt
   (seq '< '+ '>) => lt_plus_gt
 
   (seq '- '>) => rarrow
@@ -57,7 +57,7 @@ function lex : t =
   '` => backquote_ident
   '. => dot
   (+ whitechar) => whitespace
-  (seq '/ '/) => comment
+  (seq '/ '/)   => comment
 
   (seq '0 (+ digit)) => leading_zero
 
