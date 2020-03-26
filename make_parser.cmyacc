@@ -116,19 +116,19 @@ nonterminal ModuleApp : module =
   1:ModuleApp 2:ModuleAtom => app_module
 
 nonterminal ModuleAtom : module =
-  LPAREN 1:Module RPAREN                                => paren_module
-  LPAREN_PROJ 1:Module RPAREN DOT 2:UPPER_IDENT 3:Projs => proj
-  STRUCT 1:Bindings END 2:Projs                         => bindings
-  LBRACE 1:Bindings RBRACE                              => bindings0
+  LPAREN 1:Module RPAREN                                  => paren_module
+  LPAREN_PROJ 1:Module RPAREN DOT 2:UPPER_IDENT 3:Projs   => proj
+  STRUCT 1:Bindings END 2:Projs                           => bindings
+  LBRACE 1:Bindings RBRACE                                => bindings0
   LBRACE_PROJ 1:Bindings RBRACE DOT 2:UPPER_IDENT 3:Projs => bindings1
-  1:UPPER_IDENT 2:Projs                                 => module_ident
+  1:UPPER_IDENT 2:Projs                                   => module_ident
 
 /* `Path` is always followed by `DOT` */
 nonterminal Path : module =
-  LPAREN_PROJ 1:Module RPAREN => path
-  STRUCT 1:Bindings END       => path_bindings
+  LPAREN_PROJ 1:Module RPAREN   => path
+  STRUCT 1:Bindings END         => path_bindings
   LBRACE_PROJ 1:Bindings RBRACE => path_bindings
-  1:UPPER_IDENT               => path_module_ident
+  1:UPPER_IDENT                 => path_module_ident
 
 nonterminal Projs : projs =
   /* empty */               => proj_none
@@ -228,24 +228,24 @@ nonterminal Decls : decl_list =
   OPEN 1:Module 2:Decls => open_decl
 
 nonterminal Decl : decl =
-  VAL 1:LOWER_IDENT 2:TypeVars COLON 3:Type  => val_decl
-  TYPE 1:LOWER_IDENT 2:TypeVars EQUAL 3:Type => transparent_type_decl
-  TYPE 1:LOWER_IDENT 2:TypeVars              => opaque_type_decl
+  VAL 1:LOWER_IDENT 2:TypeVars COLON 3:Type         => val_decl
+  TYPE 1:LOWER_IDENT 2:TypeVars EQUAL 3:Type        => transparent_type_decl
+  TYPE 1:LOWER_IDENT 2:TypeVars                     => opaque_type_decl
   MODULE 1:UPPER_IDENT 2:MParams0 COLON 3:Signature => module_decl
-  SIGNATURE 1:UPPER_IDENT EQUAL 2:Signature  => signature_decl
-  INCLUDE 1:Signature                        => include_decl
+  SIGNATURE 1:UPPER_IDENT EQUAL 2:Signature         => signature_decl
+  INCLUDE 1:Signature                               => include_decl
   DATATYPE 1:LOWER_IDENT 2:TypeVars EQUAL 3:DatatypeDec 4:DatatypeAnd => datatype_decl
 
 nonterminal Expr : expr =
-  1:ExprApp                         => expr_app
-  1:ExprBin_                        => expr_binary
-  LET 1:Bindings IN 2:Expr          => let_expr
-  OPEN 1:Module IN 2:Expr           => open_in
-  FUN 1:Params RARROW 2:Expr        => lambda
-  IF 1:Expr THEN 2:Expr ELSE 3:Expr => if_expr
-  MATCH 1:Expr WITH 2:Branches END  => match
-  FUNCTION 1:Branches END           => function
-  PACK 1:ModuleApp COLON 2:Signature => pack
+  1:ExprApp                                 => expr_app
+  1:ExprBin_                                => expr_binary
+  LET 1:Bindings IN 2:Expr                  => let_expr
+  OPEN 1:Module IN 2:Expr                   => open_in
+  FUN 1:Params RARROW 2:Expr                => lambda
+  IF 1:Expr THEN 2:Expr ELSE 3:Expr         => if_expr
+  MATCH 1:Expr WITH 2:Branches END          => match
+  FUNCTION 1:Branches END                   => function
+  PACK 1:ModuleApp COLON 2:Signature        => pack
   1:VAL_OP 2:Pattern EQUAL 3:Expr IN 4:Expr => val_op
 
 nonterminal ExprBin_ : expr =
@@ -320,11 +320,11 @@ nonterminal Branch : branch =
   1:PatternInfix RARROW 2:Expr => branch_expr
 
 nonterminal Literal : literal =
-  1:NUMBER => number
-  1:STRING => string_literal
-  1:CHAR   => char_literal
-  FALSE    => bool_false
-  TRUE     => bool_true
+  1:NUMBER      => number
+  1:STRING      => string_literal
+  1:CHAR        => char_literal
+  FALSE         => bool_false
+  TRUE          => bool_true
   LPAREN RPAREN => unit_literal
 
 nonterminal Params : params =
