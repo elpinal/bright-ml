@@ -75,6 +75,10 @@ open M
 
 // Like Haskell's `$`, `$` can be used to omit parentheses for function applications.
 val _ = succ $ succ n   // Syntactically the same as `succ (succ n)`.
+
+// We can use an alternative syntax `{ ... }` to write
+// structures (`struct ... end`) or structure signatures (`sig ... end`).
+module M : {type t type u = t val x : t * u} = {type u = int type t = u val x = (5, 4)}
 ```
 
 ### Mutually-recursive definitions
