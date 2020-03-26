@@ -180,3 +180,29 @@ val _ =
   val+ (x, y) = e in
   val+ _ = e in
   3
+
+module M = {
+}
+
+module M = struct
+  val x = 1
+  type t = int
+  module A = struct
+    signature S = T -> U where type t = t
+  end
+end
+
+module M = {
+  val x = 1
+  type t = int
+  module A = {
+    signature S = T -> U where type t = t
+  }
+}
+
+module A = Mod.F struct type t = int end
+
+module A = Mod.F {type t = int}
+
+
+val _ = {val x = 1}.x

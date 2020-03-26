@@ -118,11 +118,13 @@ nonterminal ModuleAtom : module =
   LPAREN 1:Module RPAREN                                => paren_module
   LPAREN_PROJ 1:Module RPAREN DOT 2:UPPER_IDENT 3:Projs => proj
   STRUCT 1:Bindings END 2:Projs                         => bindings
+  LBRACE 1:Bindings RBRACE 2:Projs                      => bindings
   1:UPPER_IDENT 2:Projs                                 => module_ident
 
 nonterminal Path : module =
   LPAREN_PROJ 1:Module RPAREN => path
   STRUCT 1:Bindings END       => path_bindings
+  LBRACE 1:Bindings RBRACE    => path_bindings
   1:UPPER_IDENT               => path_module_ident
 
 nonterminal Projs : projs =
