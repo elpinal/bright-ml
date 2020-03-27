@@ -70,6 +70,11 @@ module Q = functor (X : (Y : S) -> T) -> struct
     | A of t
 end
 
+module Q = fun (X : (Y : S) -> T) -> struct
+  datatype t =
+    | A of t
+end
+
 val _ = M.W.x
 
 signature S = (X : S) -> (Y : T) -> U
@@ -130,6 +135,7 @@ module M = (A).B.C
 module M = (A).B.C.D
 
 module M = functor (X : S) (Y : T) (Z : U) -> struct end
+module M = fun (X : S) (Y : T) (Z : U) -> struct end
 module M (X : S) : T = struct end
 module M (X : S) (Y : T) (Z : U) = struct end
 

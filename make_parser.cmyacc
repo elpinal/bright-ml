@@ -94,6 +94,7 @@ nonterminal Module : module =
 
 nonterminal ModuleFunctor : module =
   FUNCTOR 1:MParams RARROW 2:Module => functor_
+  FUN 1:MParams RARROW 2:Module     => functor_
 
 nonterminal MParams : mparams =
   1:MParam           => mparam1
