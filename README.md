@@ -244,7 +244,7 @@ end
 // Implicit quantification is one of the virtues of ML.
 val id x = x
 // If we want to annotate `x` with a type which contains type variables,
-// we need to explicitly bound them.
+// we need to explicitly bind them.
 val id 'a (x : 'a) = x
 
 // This form is ill-typed because `'a` is an unbound type variable.
