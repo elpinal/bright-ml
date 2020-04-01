@@ -128,8 +128,8 @@ end) sig
     datatype t
       = Path of signature_ident Path.t
       | Fun of module_ident option * t * t (* impure functor *)
-      | WhereType of t * location * Type.t (* TODO: Should it be supported?: `where type t 'a = ...` *)
-      | DestructType of t * location * Type.t (* destructive substitution *)
+      | WhereType of t * location * type_vars * Type.t
+      | DestructType of t * location * type_vars * Type.t (* destructive substitution *)
       | Decls of decls
       | Let of X.Module.bindings * t
   end

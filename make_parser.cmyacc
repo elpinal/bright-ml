@@ -208,9 +208,9 @@ nonterminal Signature : signature_ =
   LET 1:Bindings IN 2:Signature                                    => let_sig
 
 nonterminal SigWhere : signature_ =
-  1:SigAtom                                        => sig_atom
-  1:SigWhere WHERE TYPE 2:LongType EQUAL 3:Type    => where_type
-  1:SigWhere WHERE TYPE 2:LongType COLON_EQ 3:Type => where_type_destructive
+  1:SigAtom                                                   => sig_atom
+  1:SigWhere WHERE TYPE 2:LongType 3:TypeVars EQUAL 4:Type    => where_type
+  1:SigWhere WHERE TYPE 2:LongType 3:TypeVars COLON_EQ 4:Type => where_type_destructive
 
 nonterminal SigAtom : signature_ =
   LPAREN 1:Signature RPAREN => paren_signature

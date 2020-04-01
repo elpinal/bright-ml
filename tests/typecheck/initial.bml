@@ -59,3 +59,32 @@ val _ : int = let open M val r = z * 2 in r + r
 module M = let module M = struct end in M
 
 signature S = sig end -> sig end
+
+signature S = sig
+  type t 'a
+end
+
+datatype e 'a 'b =
+  | L of 'a
+  | R of 'b
+
+signature T = S where type t 'a = e 'a 'a
+signature T = S where type t 'a := e 'a 'a
+
+signature T = S where type t =
+  let type z 'a = e 'a 'a in
+  z
+
+signature T = S where type t :=
+  let type z 'a = e 'a 'a in
+  z
+
+signature T = sig
+  type t 'a = e 'a 'a
+  include S where type t := t
+end
+
+signature T = sig
+  open struct type t 'a = e 'a 'a end
+  include S where type t := t
+end

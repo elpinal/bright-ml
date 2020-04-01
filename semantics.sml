@@ -621,7 +621,7 @@ structure Semantics = rec (X : SEMANTICS) struct
           in
             Quantified.from_body $ SS.Module.F $ Quantified.map (fn s1 => (s1, asig2)) asig1
           end
-      | elaborate env (WhereType(x, loc as (mids, tid), ty)) =
+      | elaborate env (WhereType(x, loc as (mids, tid), vs, ty)) =
           let
             val asig = elaborate env x
             val s0 = SS.Module.get_structure $ Quantified.get_body asig
@@ -629,19 +629,25 @@ structure Semantics = rec (X : SEMANTICS) struct
               List.foldl (fn (mid, s) => SS.Structure.proj_module s mid |> SS.Module.get_structure) s0 mids
             val SS.Type.In(ty1, k1, _) = SS.Structure.proj_type s1 tid
             val bid = IType.get_bound_var ty1
-            val (ty2, k2) = Type.elaborate env ty
+
+            val xs = List.map (fn v => (v, BoundID.fresh Kind.base (TypeVar.get_name v))) vs
+            val env1 = List.foldl (fn ((v, bid), acc) => Env.TypeVar.insert acc v bid) env xs
+            val (ty2, k2) = Type.elaborate env1 ty
+            val ty2' = List.foldr (fn ((_, bid), acc) => IType.abs bid acc) ty2 xs
+            val k2' = List.foldl (fn (_, acc) => Kind.arrow Kind.base acc) k2 xs
+
             val () =
-              if k1 = k2
+              if k1 = k2'
               then ()
-              else raise Kind.Mismatch(k1, k2)
+              else raise Kind.Mismatch(k1, k2')
           in
             case Quantified.find_remove (fn {v, ...} => BoundID.eq (v, bid)) asig of
                  NONE       => raise RedefinedByWhereType(loc)
                | SOME asig' =>
-                   Quantified.map (fn s => SS.Module.subst (BoundID.Map.singleton bid ty2) s) asig'
+                   Quantified.map (fn s => SS.Module.subst (BoundID.Map.singleton bid ty2') s) asig'
           end
-      | elaborate env (DestructType(x, loc, ty)) =
-          elaborate env (WhereType(x, loc, ty))
+      | elaborate env (DestructType(x, loc, vs, ty)) =
+          elaborate env (WhereType(x, loc, vs, ty))
             |> Quantified.map (SS.Module.lift_endo $ SS.Structure.remove_location loc)
       | elaborate env (Decls ds) = elaborate_decls env ds |> Quantified.map SS.Module.S
       | elaborate env (Let(bs, s)) =

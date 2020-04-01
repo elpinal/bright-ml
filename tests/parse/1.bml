@@ -234,3 +234,6 @@ module F (X : (Y : S) -> {type t = Y.a * Y.a}) = {
     type t = (X {type a = int val x = x}).t
   }
 }
+
+signature S = S where type t 'a = e 'a 'a
+signature S = S where type t 'a := e 'a 'a
