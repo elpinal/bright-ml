@@ -21,10 +21,7 @@ module Result :> sig
 
   include Bifunctor.OPS where type t := t
 
-  module Monad (X : sig type e end) : sig
-    type t 'a = t X.e 'a
-    include Monad.OPS where type t := t
-  end
+  module Monad (X : sig type e end) : Monad.OPS where type t = t X.e
 end = struct
   datatype result 'e 'a =
     | Err of 'e
