@@ -65,7 +65,7 @@ end = struct
   val rec nth n = function
     | []      -> None
     | x :: xs ->
-        let include Int in
+        open Int in
         if n == 0
         then Some x
         else nth (n - 1) xs
@@ -86,7 +86,7 @@ end = struct
   val rec take n = function
     | []      -> []
     | x :: xs ->
-        let include Int in
+        open Int in
         if 0 < n
         then x :: take (n - 1) xs
         else []
@@ -95,7 +95,7 @@ end = struct
   val rec drop n = function
     | []      -> []
     | x :: xs ->
-        let include Int in
+        open Int in
         if 0 < n
         then drop (n - 1) xs
         else x :: xs
