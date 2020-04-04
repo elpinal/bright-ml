@@ -88,3 +88,5 @@ signature T = sig
   open struct type t 'a = e 'a 'a end
   include S where type t := t
 end
+
+module R = Ref.Make {type t = list (int -> bool)}

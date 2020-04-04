@@ -1,0 +1,10 @@
+signature S = {
+  type t
+  type item
+
+  val make : item -> t
+  val get : t -> item
+  val set : t -> item -> unit
+}
+
+module Make :> (X : {type t}) -> S where type item := X.t = MakeRef

@@ -282,7 +282,7 @@ end
 ### No value restriction
 
 Bright ML is an impure language.
-However, unlike Standard ML or OCaml, it doesn't have polymorphic mutable references or something alike,
+However, unlike Standard ML or OCaml, it doesn't have *polymorphic* mutable references or something alike,
 thus in Bright ML, any expression can be generalized at `val`-bindings.
 
 ```
@@ -295,6 +295,19 @@ end = struct
   // This expression can be given a polymorphic type while it is not a syntactic value.
   val v = id [fun x -> x]
 end
+```
+
+That said, we sometimes want mutable references, so Bright ML supports *monomorphic* mutable references.
+More precisely, we can generate monomorphic mutable reference types at any given types using a generative functor `Ref.Make`.
+We can use mutable references without compromising type soundness,
+while keeping every expression polymorphic.
+
+```
+module IntListRef = Ref.Make {type t = list int}
+val r = IntListRef.make [] // This expression has abstract type `IntListRef.t`.
+val xs = 1 :: IntListRef.get r
+val _ = IntListRef.set r $ List.map (fun n -> n * 2) xs
+val _ = IntListRef.get r // This expression has type `list int`.
 ```
 
 ### Empty datatypes and exhaustivity

@@ -102,7 +102,41 @@ end = struct
         )
       ]
 
-    val m = ModuleID.Map.empty
+    val m = ModuleID.Map.from_list
+      [ ( ModuleID.from_string "MakeRef"
+        , let
+            structure BoundID = Internal.BoundID
+
+            val bid1 = BoundID.fresh Kind.base "t"
+            val bid2 = BoundID.fresh Kind.base "ref"
+
+            val ty_item = IType.bound bid1
+            val ty_ref = IType.bound bid2
+
+            val s1 =
+              SS.Structure.singleton_type (TypeID.from_string "t") $
+                SS.Type.In(ty_item, BoundID.get_kind bid1, ConstrID.Map.empty)
+
+            val s2 =
+              SS.Structure.singleton_type (TypeID.from_string "t") $
+                SS.Type.In(ty_ref, BoundID.get_kind bid2, ConstrID.Map.empty)
+          in
+            SS.Module.F $ Quantified.quantify1
+              {v = bid1, k = BoundID.get_kind bid1, location = ([], TypeID.from_string "t")}
+              ( SS.Module.S s1
+              , Quantified.quantify1
+                  {v = bid2, k = BoundID.get_kind bid1, location = ([], TypeID.from_string "t")}
+                  $ SS.Module.S $ SS.Structure.merge s2 $
+                    SS.Structure.values $ ValID.Map.from_list $
+                      map (fn (x, y) => (ValID.from_string x, SS.Term.In y))
+                      [ ("make", IType.arrow ty_item ty_ref)
+                      , ("get", IType.arrow ty_ref ty_item)
+                      , ("set", IType.arrow ty_ref $ IType.arrow ty_item unit)
+                      ]
+              )
+          end
+        )
+      ]
 
     val s = SignatureID.Map.empty
 

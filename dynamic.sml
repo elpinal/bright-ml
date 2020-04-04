@@ -51,6 +51,7 @@ structure Dynamic = struct
       | Tuple of t list
       | List of t list
       | Constructor of constr_ident * t option
+      | Ref of t ref
 
     datatype u
       = Value of t
@@ -58,6 +59,8 @@ structure Dynamic = struct
 
     fun deref (Loc r)   = !r |> expect "deref"
       | deref (Value s) = s
+
+    val unit = Lit Literal.Unit
 
     fun get_int (Lit (Literal.Int v)) = v
       | get_int _                     = raise Fail "not int"
@@ -73,6 +76,9 @@ structure Dynamic = struct
 
     fun get_list (List xs) = xs
       | get_list _         = raise Fail "not list"
+
+    fun get_ref (Ref r) = r
+      | get_ref _       = raise Fail "not reference"
 
     fun fun2 f = Fun (fn s1 => Fun (fn s2 => f (s1, s2)))
   end
@@ -124,7 +130,19 @@ structure Dynamic = struct
       Sem.Constructor(ConstrID.from_string s, NONE)
     end
 
-    val initial = VarMap.from_list $
+    val initial_modules = VarMap.from_list $
+      List.map (fn (x, s) => (Label.encode $ Label.module $ ModuleID.from_string x, Sem.Value s))
+      [ ( "MakeRef"
+        , Sem.Fun (fn _ => Sem.Record $ Record.from_list $
+            map (fn (x, y) => (Label.value $ ValID.from_string x, y))
+            [ ("make", Sem.Fun (fn s1 => Sem.Ref $ ref s1))
+            , ("get", Sem.Fun (fn s1 => !(Sem.get_ref s1)))
+            , ("set", Sem.fun2 (fn (s1, s2) => Sem.unit before Sem.get_ref s1 := s2))
+            ])
+        )
+      ]
+
+    val initial = VarMap.union initial_modules $ VarMap.from_list $
       List.map (fn (x, s) => (Label.encode $ Label.value $ ValID.from_string x, Sem.Value s))
       [ ( "print_endline"
         , Sem.Fun (fn s => Sem.Lit Literal.Unit before print (Sem.get_string s ^ "\n"))
