@@ -19,6 +19,8 @@ module Result :> sig
   val unwrap_or 'e 'a      : 'a -> t 'e 'a -> 'a
   val unwrap_or_else 'e 'a : ('e -> 'a) -> t 'e 'a -> 'a
 
+  val from_option 'e 'a : 'e -> option 'a -> t 'e 'a
+
   include Bifunctor.OPS where type t := t
 
   module Monad (X : sig type e end) : Monad.OPS where type t = t X.e
@@ -77,6 +79,11 @@ end = struct
   val unwrap_or_else f = function
     | Err e -> f e
     | Ok x  -> x
+  end
+
+  val from_option e = function
+    | None   -> Err e
+    | Some x -> Ok x
   end
 
   include Bifunctor.Make struct
