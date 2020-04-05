@@ -1,0 +1,23 @@
+module Pretty :> sig
+  type t = string
+
+  val `<>`  : t -> t -> t
+  val `<+>` : t -> t -> t
+
+  val paren : bool -> t -> t
+
+  val brace : t -> t
+  val brack : t -> t
+end = struct
+  include String
+
+  val `<+>` x y = x <> " " <> y
+
+  val paren b x =
+    if b
+    then "(" <> x <> ")"
+    else x
+
+  val brace x = "{" <> x <> "}"
+  val brack x = "[" <> x <> "]"
+end
