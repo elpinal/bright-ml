@@ -1,5 +1,7 @@
 open Std
 
+val version = "0.1.2"
+
 fun fail s =
 let val () = TextIO.output (TextIO.stdErr, "error: " ^ s ^ "\n") in
   OS.Process.exit OS.Process.failure
@@ -9,11 +11,13 @@ structure M = CLI struct
   val args = CommandLine.arguments ()
 end
 
+fun print_endline s = print $ s ^ "\n"
+
 val () =
   case M.v of
        M.Help            => print M.usage
-     | M.Version         => print "0.1.0\n"
-     | M.Error e         => print (M.show_error e ^ "\n")
+     | M.Version         => print_endline $ "Bright ML version " ^ version
+     | M.Error e         => print_endline $ M.show_error e
      | M.Normal(s, flag) =>
          let val path = Filepath.relative s in
            case parse_file path >>= (fn bs =>
