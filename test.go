@@ -3,15 +3,25 @@ package main
 import (
 	"bytes"
 	"errors"
+	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 )
 
+var update = flag.Bool("update", false, "update golden files")
+
 func main() {
-	for d, args := range map[string][]string{"typecheck": {"-typecheck"}, "parse": {"-parse"}} {
+	flag.Parse()
+
+	for d, args := range map[string][]string{
+		"typecheck": {"-typecheck"},
+		"parse":     {"-parse"},
+		"eval":      {},
+	} {
 		n, err := run(d, args)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Test failed: %v\n", err)
@@ -74,11 +84,30 @@ func run(d string, args []string) (n int, err error) {
 		}
 
 		var buf bytes.Buffer
+		var output bytes.Buffer
 		cmd := exec.Command("./bright-ml", append(args, filepath.Join(dir, name))...)
 		cmd.Stderr = &buf
+		cmd.Stdout = &output
 		cmd.Env = append(os.Environ(), "BML_PATH="+pwd)
 		if err := cmd.Run(); err != nil {
 			return n, &Error{err: err, filename: name, stderr: buf.String()}
+		}
+		if d == "eval" {
+			golden := filepath.Join(dir, strings.ReplaceAll(name, ".bml", ".golden"))
+			if *update {
+				err := ioutil.WriteFile(golden, output.Bytes(), 0644)
+				if err != nil {
+					return n, err
+				}
+			}
+			expected, err := ioutil.ReadFile(golden)
+			if err != nil {
+				return n, err
+			}
+			got := output.String()
+			if got != string(expected) {
+				return n, fmt.Errorf("%s: evaluation result differs from the golden file", filepath.Join(dir, name))
+			}
 		}
 		n++
 	}

@@ -26,6 +26,9 @@ run: all
 test:
 	go run test.go
 
+test-with-update:
+	go run test.go -update
+
 
 install:
 ifndef PREFIX
@@ -33,4 +36,4 @@ ifndef PREFIX
 endif
 	cp ./bright-ml $(PREFIX)/bright-ml
 
-.PHONY: all lib cmlib run test install
+.PHONY: all lib cmlib run test test-with-update install
