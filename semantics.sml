@@ -589,8 +589,12 @@ structure Semantics = rec (X : SEMANTICS) struct
             val (e1, _) = X.Module.elaborate env m
             val env1 = Env.insert env (SS.Module.get_structure $ Quantified.get_body e1)
             val e2 = elaborate_decls env1 ds
+            val bid_set =
+              BoundID.Map.from_list $
+                List.map (fn info => (#v info, ())) (Quantified.get_bound_vars e1)
+            val () = SS.Signature.not_contain bid_set (SS.Signature.In $ Quantified.map SS.Module.S e2)
           in
-            Quantified.merge (fn _ => fn x => x) e1 e2
+            e2
           end
 
     fun elaborate env (Path p) =
