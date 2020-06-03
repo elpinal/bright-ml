@@ -325,13 +325,15 @@ end = struct
       open Std V
       fun paren s = "(" ^ s ^ ")"
     in
-      fun show (Var v) = show_var v
-        | show (App(x, y)) = paren $ show x ^ " " ^ show y
+      fun show (Var v)       = show_var v
+        | show (Abs _)       = "lambda"
+        | show (App(x, y))   = paren $ show x ^ " " ^ show y
         | show (Arrow(x, y)) = paren $ show x ^ " -> " ^ show y
-        | show (Forall _) = "forall"
-        | show (Tuple b) = "tuple"
-        | show (Base b) = Base.show b
-        | show _ = raise NotYetImplemented "IType.show"
+        | show (Forall _)    = "forall"
+        | show (Exist _)     = "exist"
+        | show (Record _)    = "record"
+        | show (Tuple b)     = "tuple"
+        | show (Base b)      = Base.show b
 
       and show_var (Bound bid) = BoundID.show bid
         | show_var (Free fv) =
