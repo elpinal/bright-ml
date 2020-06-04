@@ -3,7 +3,7 @@ open Std Result
 structure BrightML : sig
   val parse_file : Filepath.relative -> Syntax.Unit.t result
   val elaborate : Filepath.relative -> Syntax.Unit.t -> Internal.term result
-  val interpret : Internal.term -> unit
+  val interpret : Internal.term -> unit result
 end = struct
   fun parse_file filepath =
     Right $ #1 $ Parser.parse $ Lexer.lex $ Stream.fromTextInstream $ TextIO.openIn $ Filepath.relative_to_string filepath
@@ -26,7 +26,9 @@ end = struct
 
   fun interpret t =
   (* let val () = print (Internal.Term.show t ^ "\n") in *)
-    ignore (Dynamic.eval Dynamic.Env.initial $ Internal.Term.to_dynamic t)
+    Right $ ignore (Dynamic.eval Dynamic.Env.initial $ Internal.Term.to_dynamic t)
+    handle
+      Dynamic.Panic msg => Left("panicked: " ^ msg)
   (* end *)
 end
 

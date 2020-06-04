@@ -78,6 +78,8 @@ end = struct
     val bid_order = Internal.BoundID.fresh_with_content Kind.base "order" (ref (SOME m_order))
     val m_order = ConstrID.Map.map (fn (x, y) => SS.Constr.In(x, bid_order, y)) m_order
 
+    val bid_panic = Internal.BoundID.fresh Kind.base "panic"
+
     val v = ValID.Map.from_list $ map (fn (x, y) => (ValID.from_string x, SS.Term.In y))
       [ ("print_endline", IType.arrow string unit)
       , ("show_int", IType.arrow int string)
@@ -87,6 +89,7 @@ end = struct
       , ("*", IType.arrow int $ IType.arrow int int)
       , ("compare_int", IType.arrow int $ IType.arrow int $ IType.bound bid_order)
       , ("compare_string", IType.arrow string $ IType.arrow string $ IType.bound bid_order)
+      , ("panic", IType.forall [bid_panic] $ IType.arrow string $ IType.bound bid_panic)
       ]
 
     val t = TypeID.Map.from_list

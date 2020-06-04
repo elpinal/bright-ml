@@ -22,7 +22,7 @@ val () =
          let val path = Filepath.relative s in
            case parse_file path >>= (fn bs =>
              case flag of
-                  M.None => interpret <$> elaborate path bs
+                  M.None => elaborate path bs >>= interpret
                 | M.Parse => Right ()
                 | M.Typecheck => ignore <$> elaborate path bs) of
                 Right _ => ()

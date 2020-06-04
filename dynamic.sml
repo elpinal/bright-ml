@@ -1,6 +1,8 @@
 structure Dynamic = struct
   open Std
 
+  exception Panic of string
+
   type var = string
 
   structure VarMap = BinarySearchMap struct
@@ -164,6 +166,7 @@ structure Dynamic = struct
         )
       , ("compare_int", Sem.fun2 compare_int)
       , ("compare_string", Sem.fun2 compare_string)
+      , ("panic", Sem.Fun (fn s => raise Panic(Sem.get_string s)))
       ]
   end
 
