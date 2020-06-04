@@ -8,6 +8,7 @@ module Option :> sig
   val is_none 'a : t 'a -> bool
   val is_some 'a : t 'a -> bool
 
+  val unwrap    'a : t 'a -> 'a
   val unwrap_or 'a : 'a -> t 'a -> 'a
   val map_or 'a 'b : 'b -> ('a -> 'b) -> t 'a -> 'b
 
@@ -49,6 +50,11 @@ end = struct
       | None   -> None
       | Some x -> f x
     end
+  end
+
+  val unwrap = function
+    | None   -> panic "unwrap: None"
+    | Some x -> x
   end
 
   val unwrap_or def = function
