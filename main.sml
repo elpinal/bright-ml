@@ -1,6 +1,6 @@
 open Std
 
-val version = "0.1.2"
+val version = "0.1.3"
 
 fun fail s =
 let val () = TextIO.output (TextIO.stdErr, "error: " ^ s ^ "\n") in
