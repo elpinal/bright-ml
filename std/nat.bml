@@ -16,6 +16,12 @@ module Nat :> sig
   module Mul : Monoid.S where type t = t
 
   include Ord.OPS where type t := t
+
+  datatype s =
+    | Zero
+    | Succ of t
+
+  val proj : t -> s
 end = struct
   datatype u 'a =
     | Z
@@ -89,4 +95,14 @@ end = struct
     type t = t
     val compare = compare
   end
+
+  datatype s =
+    | Zero
+    | Succ of t
+
+  val proj (In x) =
+    match x with
+      | Z   -> Zero
+      | S x -> Succ x
+    end
 end
