@@ -106,3 +106,5 @@ end = struct
       | S x -> Succ x
     end
 end
+
+type nat = Nat.t
