@@ -242,6 +242,7 @@ end
 
 ```
 // Implicit polymorphism is one of the virtues of ML.
+// This function has type `∀α. α -> α`.
 val id x = x
 // If we want to annotate `x` with a type which contains type variables,
 // we need to explicitly bind them.
