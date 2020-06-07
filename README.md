@@ -299,7 +299,8 @@ end
 ```
 
 That said, we sometimes want mutable references, so Bright ML supports *monomorphic* mutable references.
-More precisely, we can generate monomorphic mutable reference types at any given types using a generative functor `Ref.Make`.
+More precisely, we can generate monomorphic mutable reference **types** at any given types using a generative functor `Ref.Make`
+in the standard library.
 We can use mutable references without compromising type soundness,
 while keeping every expression polymorphic.
 
@@ -309,6 +310,15 @@ val r = IntListRef.make [] // This expression has abstract type `IntListRef.t`.
 val xs = 1 :: IntListRef.get r
 val _ = IntListRef.set r $ List.map (fun n -> n * 2) xs
 val _ = IntListRef.get r // This expression has type `list int`.
+```
+
+One drawback of this approach is that we cannot write recursive datatypes in terms of their references.
+For example, the following, valid Standard ML code cannot be written in Bright ML.
+
+```sml
+datatype t =
+    A
+  | B of t ref
 ```
 
 ### Empty datatypes and exhaustivity
