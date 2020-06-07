@@ -241,7 +241,7 @@ end
 ```
 
 ```
-// Implicit quantification is one of the virtues of ML.
+// Implicit polymorphism is one of the virtues of ML.
 val id x = x
 // If we want to annotate `x` with a type which contains type variables,
 // we need to explicitly bind them.
