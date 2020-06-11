@@ -36,6 +36,12 @@ module List :> sig
   val fold_right 'a 'b : ('a -> 'b -> 'b) -> 'b -> t 'a -> 'b
 
   val fold 'a : pack (Monoid.S where type t = 'a) -> t 'a -> 'a
+
+  module Monad (X : Monad.S) : {
+    val map 'a 'b : ('a -> X.t 'b) -> t 'a -> X.t (t 'b)
+
+    val fold_left 'a 'b : ('b -> 'a -> X.t 'b) -> 'b -> t 'a -> X.t 'b
+  }
 end = struct
   type t = list
 
@@ -199,4 +205,23 @@ end = struct
   val fold 'a m xs =
     let module M = unpack m : Monoid.S where type t = 'a in
     fold_left M.`<>` M.empty xs
+
+  module Monad (X : Monad.S) = {
+    open Monad.Make X
+
+    val rec map f = function
+      | []      -> X.return []
+      | x :: xs ->
+          val+ v = f x in
+          val+ vs = map f xs in
+          X.return $ v :: vs
+    end
+
+    val fold_left f =
+      let val rec go e = function
+        | []      -> X.return e
+        | x :: xs -> X.bind (f e x) $ fun v -> go v xs
+      end in
+      go
+  }
 end
