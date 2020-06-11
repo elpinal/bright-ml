@@ -332,7 +332,7 @@ end = struct
         | show (Forall _)    = "forall"
         | show (Exist _)     = "exist"
         | show (Record _)    = "record"
-        | show (Tuple b)     = "tuple"
+        | show (Tuple xs)    = paren $ show_tuple xs
         | show (Base b)      = Base.show b
 
       and show_var (Bound bid) = BoundID.show bid
@@ -340,6 +340,10 @@ end = struct
             case !fv of
                  Defined ty => show ty
                | Undefined fid => FreeID.show fid
+
+      and show_tuple []        = ""
+        | show_tuple [x]       = show x
+        | show_tuple (x :: xs) = show x ^ ", " ^ show_tuple xs
     end
 
     fun equal ty1 ty2 k =
