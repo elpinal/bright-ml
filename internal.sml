@@ -56,6 +56,7 @@ end) sig
     val list : t -> t
 
     val get_bound_var : t -> BoundID.t
+    val get_bound_var_up_to_beta_eta : t -> kind -> BoundID.t
     val get_bool : t -> unit
 
     val try_get_tuple : t -> t list option
@@ -434,6 +435,26 @@ end = struct
     fun equal_base x y =
       true before equal x y Kind.base
       handle _ => false
+
+    fun get_bound_var_up_to_beta_eta xs ty (Kind.Arrow(k1, k2)) =
+          let val v = free $ FreeID.fresh k1 "?get_bound_var" in
+            get_bound_var_up_to_beta_eta (v :: xs) (App(ty, v)) k2
+          end
+      | get_bound_var_up_to_beta_eta xs ty Kind.@^ =
+          let
+            fun f ty' vs =
+              case (ty', vs) of
+                   (Var(V.Bound bid), [])   => bid
+                 | (App(ty1, ty2), v :: vs) =>
+                     if (str_equiv (reduce ty2) v; true) handle _ => false
+                     then f ty1 vs
+                     else raise NotBoundVar(ty)
+                 | _ => raise NotBoundVar(ty)
+          in
+            f (reduce ty) xs
+          end
+
+    val get_bound_var_up_to_beta_eta = get_bound_var_up_to_beta_eta []
 
     fun is_some (SOME _) = true
       | is_some NONE     = false

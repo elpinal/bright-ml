@@ -632,7 +632,7 @@ structure Semantics = rec (X : SEMANTICS) struct
             val s1 =
               List.foldl (fn (mid, s) => SS.Structure.proj_module s mid |> SS.Module.get_structure) s0 mids
             val SS.Type.In(ty1, k1, _) = SS.Structure.proj_type s1 tid
-            val bid = IType.get_bound_var ty1 (* TODO: test on beta-eta normal form *)
+            val bid = IType.get_bound_var_up_to_beta_eta ty1 k1
 
             val xs = List.map (fn v => (v, BoundID.fresh Kind.base (TypeVar.get_name v))) vs
             val env1 = List.foldl (fn ((v, bid), acc) => Env.TypeVar.insert acc v bid) env xs
