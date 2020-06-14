@@ -1,0 +1,14 @@
+signature S = sig
+  type t 'a
+  type u 'a = t 'a
+end where type t 'a = int
+
+signature T = sig
+  type t 'a
+  type u = t
+end where type u 'a = int
+
+signature U = sig
+  type t 'a
+  type u 'a = t 'a
+end where type u 'a = int
