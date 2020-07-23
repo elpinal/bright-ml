@@ -18,6 +18,7 @@ module List :> sig
   val zip_with 'a 'b 'c : ('a -> 'b -> 'c) -> t 'a -> t 'b -> t 'c
 
   val reverse 'a : t 'a -> t 'a
+  val append 'a : t 'a -> t 'a -> t 'a
 
   val intersperse 'a : 'a -> t 'a -> t 'a
 
@@ -143,6 +144,12 @@ end = struct
       | x :: xs -> go (x :: acc) xs
     end in
     go []
+
+  val rec append xs ys =
+    match xs with
+      | []      -> ys
+      | x :: xs -> x :: append xs ys
+    end
 
   val rec intersperse y = function
     | []      -> []
