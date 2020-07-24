@@ -21,10 +21,17 @@ val () =
      | M.Normal(s, flag) =>
          let val path = Filepath.relative s in
            case parse_file path >>= (fn bs =>
-             case flag of
-                  M.None => elaborate path bs >>= interpret
-                | M.Parse => Right ()
-                | M.Typecheck => ignore <$> elaborate path bs) of
+             let
+               val (no_std, f) =
+                 case flag of
+                      M.Std f   => (false, f)
+                    | M.NoStd f => (true, f)
+             in
+               case f of
+                 M.None => elaborate no_std path bs >>= interpret
+               | M.Parse => Right ()
+               | M.Typecheck => ignore <$> elaborate no_std path bs
+             end) of
                 Right _ => ()
               | Left s  => fail s
          end
