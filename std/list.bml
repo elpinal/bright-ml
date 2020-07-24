@@ -14,11 +14,11 @@ module List :> sig
   val take 'a : int -> t 'a -> t 'a
   val drop 'a : int -> t 'a -> t 'a
 
-  val zip 'a 'b : t 'a -> t 'b -> t ('a * 'b)
+  val zip 'a 'b         : t 'a -> t 'b -> t ('a * 'b)
   val zip_with 'a 'b 'c : ('a -> 'b -> 'c) -> t 'a -> t 'b -> t 'c
 
   val reverse 'a : t 'a -> t 'a
-  val append 'a : t 'a -> t 'a -> t 'a
+  val append 'a  : t 'a -> t 'a -> t 'a
 
   val intersperse 'a : 'a -> t 'a -> t 'a
 
