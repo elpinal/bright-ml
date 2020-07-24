@@ -1,4 +1,4 @@
-submodule Applicative = "applicative"
+/// Finite map represented as an abstraction-unsafe applicative functor.
 
 signature S = sig
   type t 'a
@@ -30,14 +30,25 @@ signature S = sig
   include Functor.S where type t := t
 
   module Monoid (X : sig type elem end) : Monoid.S where type t = t X.elem
+
+  module Key : Ord.S where type t = key
+  open {module Set = Set.Applicative.Make Key}
+  val keys 'a     : t 'a -> Set.t
+  val from_set 'a : (key -> 'a) -> Set.t -> t 'a
 end
 
-module Make (X : Ord.S) :> S where type key = X.t = struct
+open {
+  datatype t 'k 'a =
+    | E
+    | T of 'k * 'a * t 'k 'a * t 'k 'a
+}
+
+module Make (X : Ord.S) :> S
+  where type t = t X.t
+  where type key = X.t = struct
   type key = X.t
 
-  datatype t 'a =
-    | E
-    | T of key * 'a * t 'a * t 'a
+  type t = t key
 
   val empty = E
 
@@ -151,4 +162,15 @@ module Make (X : Ord.S) :> S where type key = X.t = struct
         then T(k, v, x', y')
         else union x' y'
   end
+
+  module Key = X
+  module Set = Set.Applicative.Make Key
+
+  val rec keys m =
+    match m with
+      | E             -> Set.empty
+      | T(k, _, x, y) -> Set.insert k $ Set.union (keys x) (keys y)
+    end
+
+  val from_set f s = Set.fold_left (fun acc k -> insert k (f k) acc) E s
 end
