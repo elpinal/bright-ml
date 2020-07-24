@@ -1,4 +1,4 @@
-submodule Applicative = "applicative"
+/// Finite set represented as an abstraction-unsafe applicative functor.
 
 signature S = sig
   type t
@@ -22,12 +22,18 @@ signature S = sig
   val fold_right 'a : (key -> 'a -> 'a) -> 'a -> t -> 'a
 end
 
-module Make (X : Ord.S) :> S where type key = X.t = struct
+open {
+  datatype t 'a =
+    | E
+    | T of 'a * t 'a * t 'a
+}
+
+module Make (X : Ord.S) :> S
+  where type t = t X.t
+  where type key = X.t = struct
   type key = X.t
 
-  datatype t =
-    | E
-    | T of key * t * t
+  type t = t key
 
   val empty = E
 
