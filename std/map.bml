@@ -45,7 +45,7 @@ module Make (X : Ord.S) :> S where type key = X.t = struct
 
   val rec size s = match s with
     | E             -> 0
-    | T(_, _, x, y) -> size x + size y
+    | T(_, _, x, y) -> 1 + size x + size y
   end
 
   val is_empty = function
